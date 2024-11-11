@@ -1,0 +1,22 @@
+{
+  "name": "nursecare-frontend",
+  "version": "1.0.0",
+  "description": "This template should help get you started developing with Vue 3 in Vite.",
+  "main": "eslint.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.0",
+    "@types/node": "^22.9.0",
+    "@types/vue-router": "^2.0.0",
+    "@vue/runtime-core": "^3.5.12",
+    "@vue/tsconfig": "^0.6.0",
+    "vue-router": "^4.4.5"
+  },
+  "dependencies": {
+    "vite-plugin-vue": "^0.0.1"
+  }
+}
