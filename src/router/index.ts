@@ -36,10 +36,10 @@ router.beforeEach((to, from, next) => {
   const token = Cookies.get('token')
   const isAuthenticated = token !== undefined
 
-  let isAdmin = false
+  let userRole: number | null = null
   if (token) {
     const payload = JSON.parse(atob(token.split('.')[1]))
-    isAdmin = payload.isAdmin
+    userRole = payload.userRole
   }
 
   if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
@@ -47,14 +47,17 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (isAuthenticated && !isAdmin) {
-    if (to.matched.some(record => record.meta.requiresAdmin)) {
-      if (to.path === '/home') {
-        next({ name: 'DVHome' })
-        return
-      }
-
-      next({ name: 'AccessDenied' })
+  if (userRole !== null) {
+    if (to.matched.some(record => record.meta.requiresManager) && userRole !== 1) {
+      next({ name: 'PagePourLesAutresRoles' })
+      return
+    }
+    if (to.matched.some(record => record.meta.requiresSecretary) && userRole !== 2) {
+      next({ name: 'PagePourLesAutresRoles' })
+      return
+    }
+    if (to.matched.some(record => record.meta.requiresNurse) && userRole !== 3) {
+      next({ name: 'PagePourLesAutresRoles' })
       return
     }
   }

@@ -3,8 +3,15 @@
   "version": "1.0.0",
   "description": "This template should help get you started developing with Vue 3 in Vite.",
   "main": "eslint.config.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build --force",
+    "lint": "eslint . --fix",
+    "format": "prettier --write src/"
   },
   "author": "",
   "license": "ISC",
@@ -15,12 +22,14 @@
     "@types/vue-router": "^2.0.0",
     "@vue/runtime-core": "^3.5.12",
     "@vue/tsconfig": "^0.6.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.48",
+    "tailwindcss": "^3.4.14",
     "vue-router": "^4.4.5"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^5.1.5",
     "js-cookie": "^3.0.5",
-    "tailwindcss": "^3.4.14",
     "vite": "^5.4.11",
     "vite-plugin-vue": "^0.0.1"
   }

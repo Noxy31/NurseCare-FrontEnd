@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'PoppinsMedium';
+  src: url('@/assets/fonts/Poppins-Medium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Octarine';
+  src: url('@/assets/fonts/Octarine-BoldOblique.otf') format('opentype');
+  font-weight: bold;
+  font-style: oblique;
+}
+
+
+body {
+  font-family: 'PoppinsMedium', sans-serif;
+}
