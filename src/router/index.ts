@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 import Login from '@/components/Login.vue'
 import AccessDenied from '@/components/AccessDenied.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
+import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -24,6 +25,11 @@ const routes: Array<RouteRecordRaw> = [
       errorTitle: '404 Page Not Found',
       errorMessage: 'The page you are looking for does not exist.',
     },
+  },
+  {
+    path: '/SHome',
+    name: 'SecretaryHome',
+    component: SecretaryHome,
   },
 ]
 

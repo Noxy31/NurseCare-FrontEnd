@@ -48,7 +48,7 @@ const handleLogin = async (formData: Record<string, string>) => {
 
     const data = await response.json()
     console.log('Login successful:', data.message)
-    router.push('/home')
+    router.push('/SHome')
   } catch (error) {
     console.error('Error during login:', error)
   } finally {
@@ -59,7 +59,6 @@ const handleLogin = async (formData: Record<string, string>) => {
 
 <template>
   <div class="relative flex flex-col min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50 p-4">
-    <!-- Header with logo and title -->
     <div class="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
       <img
         src="@/assets/logo/NurseCare-Logo.png"
