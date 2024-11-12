@@ -59,13 +59,14 @@ const handleLogin = async (formData: Record<string, string>) => {
 
 <template>
   <div class="relative flex flex-col min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50 p-4">
+    <!-- Header with logo and title -->
     <div class="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
       <img
         src="@/assets/logo/NurseCare-Logo.png"
         alt="Nurse Care Logo"
         class="h-24 w-auto drop-shadow-md"
       />
-      <h1 class="text-6xl md:text-8xl font-Octarine text-sky-950/80 drop-shadow-lg whitespace-nowrap">
+      <h1 class="text-6xl md:text-8xl font-Octarine whitespace-nowrap bg-gradient-to-r from-sky-400 via-sky-500 to-blue-400 text-transparent bg-clip-text drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)] px-1">
         Nurse Care
       </h1>
     </div>
