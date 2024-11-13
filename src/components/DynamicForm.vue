@@ -101,116 +101,117 @@ const getOptions = (options: FormField['options']) => {
 </script>
 
 <template>
-  <form
-    @submit.prevent="submitForm"
-    class="space-y-6 w-full"
+  <div
+    class="bg-sky-900/20 backdrop-blur-md p-4 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-sky-700/20"
   >
-    <div v-for="field in fields" :key="field.name" class="form-group relative">
-      <label :for="field.name" class="block text-sky-900 text-sm font-medium mb-1">
-        {{ field.label }}
-        <span v-if="field.required" class="text-red-400">*</span>
-      </label>
+    <form
+      @submit.prevent="submitForm"
+      class="space-y-6 w-full"
+    >
+      <div v-for="field in fields" :key="field.name" class="form-group relative">
+        <label :for="field.name" class="block text-sky-900 text-sm font-medium mb-1">
+          {{ field.label }}
+          <span v-if="field.required" class="text-red-400">*</span>
+        </label>
 
-      <select
-        v-if="field.type === 'select'"
-        :name="field.name"
-        v-model="formData[field.name]"
-        class="mt-1 block w-full p-2.5 rounded-lg border border-sky-200 bg-white text-sky-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
-      >
-        <option disabled value="">{{ field.placeholder }}</option>
-        <option
-          v-for="option in getOptions(field.options)"
-          :key="option.value"
-          :value="option.value"
+        <select
+          v-if="field.type === 'select'"
+          :name="field.name"
+          v-model="formData[field.name]"
+          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
         >
-          {{ option.label }}
-        </option>
-      </select>
+          <option disabled value="">{{ field.placeholder }}</option>
+          <option
+            v-for="option in getOptions(field.options)"
+            :key="option.value"
+            :value="option.value"
+            class="bg-white text-sky-900"
+          >
+            {{ option.label }}
+          </option>
+        </select>
 
-      <div v-else-if="field.suggestions" class="relative">
+        <div v-else-if="field.suggestions" class="relative">
+          <input
+            type="text"
+            :name="field.name"
+            v-model="formData[field.name]"
+            :placeholder="field.placeholder"
+            @input="() => filterSuggestions(field)"
+            class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-sky-600/50 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
+          />
+          <ul
+            v-if="filteredSuggestions[field.name]?.length"
+            class="absolute z-10 bg-sky-900/10 backdrop-blur-sm border border-sky-700/30 rounded-lg w-full mt-1 shadow-lg"
+          >
+            <li
+              v-for="suggestion in filteredSuggestions[field.name]"
+              :key="suggestion.value"
+              @click="selectSuggestion(suggestion, field.name)"
+              class="cursor-pointer text-sky-900 p-2.5 first:rounded-t-lg last:rounded-b-lg hover:bg-sky-800/20 transition-colors"
+            >
+              {{ suggestion.label }}
+            </li>
+          </ul>
+        </div>
+
+        <div
+          v-else-if="field.type === 'toggle'"
+          class="mt-3 flex items-center space-x-3"
+        >
+          <label
+            :for="field.name"
+            class="relative inline-flex items-center cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              :id="field.name"
+              v-model="formData[field.name]"
+              class="sr-only peer"
+            />
+            <div
+              class="w-11 h-6 bg-sky-900/10 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-600/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-sky-700/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-700/40"
+            ></div>
+            <span class="ml-3 text-sm font-medium text-sky-900">
+              {{ formData[field.name] ? field.toggleLabel?.[0] : field.toggleLabel?.[1] }}
+            </span>
+          </label>
+        </div>
+
         <input
-          type="text"
+          v-else
+          :type="field.type"
           :name="field.name"
           v-model="formData[field.name]"
           :placeholder="field.placeholder"
-          @input="() => filterSuggestions(field)"
-          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-200 bg-white text-sky-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+          :required="field.required"
+          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-sky-600/50 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
         />
-        <ul
-          v-if="filteredSuggestions[field.name]?.length"
-          class="absolute z-10 bg-white border border-sky-100 rounded-lg w-full mt-1 shadow-lg"
+
+        <div
+          v-if="field.required && !formData[field.name]"
+          class="text-red-400 text-sm mt-1"
         >
-          <li
-            v-for="suggestion in filteredSuggestions[field.name]"
-            :key="suggestion.value"
-            @click="selectSuggestion(suggestion, field.name)"
-            class="cursor-pointer hover:bg-sky-50 p-2.5 text-sky-900 first:rounded-t-lg last:rounded-b-lg"
-          >
-            {{ suggestion.label }}
-          </li>
-        </ul>
+          {{ field.label }} is required.
+        </div>
       </div>
 
-      <div
-        v-else-if="field.type === 'toggle'"
-        class="mt-3 flex items-center space-x-3"
+      <button
+        type="submit"
+        :disabled="isLoading"
+        class="w-full p-3 rounded-lg bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <label
-          :for="field.name"
-          class="relative inline-flex items-center cursor-pointer"
-        >
-          <input
-            type="checkbox"
-            :id="field.name"
-            v-model="formData[field.name]"
-            class="sr-only peer"
-          />
-          <div
-            class="w-11 h-6 bg-sky-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-sky-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"
-          ></div>
-          <span class="ml-3 text-sm font-medium text-sky-900">
-            {{
-              formData[field.name]
-                ? field.toggleLabel?.[0]
-                : field.toggleLabel?.[1]
-            }}
-          </span>
-        </label>
-      </div>
-
-      <input
-        v-else
-        :type="field.type"
-        :name="field.name"
-        v-model="formData[field.name]"
-        :placeholder="field.placeholder"
-        :required="field.required"
-        class="mt-1 block w-full p-2.5 rounded-lg border border-sky-200 bg-white text-sky-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
-      />
-
-      <div
-        v-if="field.required && !formData[field.name]"
-        class="text-red-400 text-sm mt-1"
-      >
-        {{ field.label }} is required.
-      </div>
-    </div>
-
-    <button
-      type="submit"
-      :disabled="isLoading"
-      class="w-full p-3 rounded-lg bg-sky-500 text-white hover:bg-sky-600 focus:ring-4 focus:ring-sky-200 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-    >
-      <span v-if="!isLoading">{{ submitLabel }}</span>
-      <div v-else class="flex items-center justify-center gap-2">
-        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Loading...
-      </div>
-    </button>
-  </form>
+        <span v-if="!isLoading">{{ submitLabel }}</span>
+        <div v-else class="flex items-center justify-center gap-2">
+          <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading...
+        </div>
+      </button>
+    </form>
+  </div>
 </template>
 
 <style scoped>

@@ -48,7 +48,7 @@ onMounted(() => {
       <div class="flex flex-col space-y-2">
         <router-link
           to="/Splanning"
-          class="p-3 text-sky-900 hover:bg-sky-100 rounded-lg transition-colors flex items-center gap-3"
+          class="p-3 text-sky-900 hover:bg-sky-200/70 hover:text-sky-950 rounded-lg transition-all duration-200 flex items-center gap-3"
         >
           <Calendar class="h-5 w-5" />
           Planning
@@ -56,7 +56,7 @@ onMounted(() => {
 
         <router-link
           to="/bills"
-          class="p-3 text-sky-900 hover:bg-sky-100 rounded-lg transition-colors flex items-center gap-3"
+          class="p-3 text-sky-900 hover:bg-sky-200/70 hover:text-sky-950 rounded-lg transition-all duration-200 flex items-center gap-3"
         >
           <Receipt class="h-5 w-5" />
           Bills
@@ -64,7 +64,7 @@ onMounted(() => {
 
         <router-link
           to="/patients"
-          class="p-3 text-sky-900 hover:bg-sky-100 rounded-lg transition-colors flex items-center gap-3"
+          class="p-3 text-sky-900 hover:bg-sky-200/70 hover:text-sky-950 rounded-lg transition-all duration-200 flex items-center gap-3"
         >
           <Users class="h-5 w-5" />
           Patients
@@ -74,7 +74,7 @@ onMounted(() => {
 
         <router-link
           to="/users"
-          class="p-3 text-sky-900 hover:bg-sky-100 rounded-lg transition-colors flex items-center gap-3"
+          class="p-3 text-sky-900 hover:bg-sky-200/70 hover:text-sky-950 rounded-lg transition-all duration-200 flex items-center gap-3"
         >
           <UserCog class="h-5 w-5" />
           Users
@@ -84,9 +84,9 @@ onMounted(() => {
       <div class="mt-auto pt-6">
         <button
           @click="logout"
-          class="w-full p-3 text-sky-900 hover:bg-sky-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+          class="w-full p-3 text-rose-700 hover:bg-rose-100/70 hover:text-rose-800 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group"
         >
-          <LogOut class="h-5 w-5" />
+          <LogOut class="h-5 w-5 group-hover:stroke-rose-800 transition-colors" />
           Logout
         </button>
       </div>
