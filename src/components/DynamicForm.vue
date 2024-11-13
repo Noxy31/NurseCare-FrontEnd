@@ -118,7 +118,7 @@ const getOptions = (options: FormField['options']) => {
           v-if="field.type === 'select'"
           :name="field.name"
           v-model="formData[field.name]"
-          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
+          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors placeholder-slate-600"
         >
           <option disabled value="">{{ field.placeholder }}</option>
           <option
@@ -138,7 +138,7 @@ const getOptions = (options: FormField['options']) => {
             v-model="formData[field.name]"
             :placeholder="field.placeholder"
             @input="() => filterSuggestions(field)"
-            class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-sky-600/50 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
+            class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-slate-600 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
           />
           <ul
             v-if="filteredSuggestions[field.name]?.length"
@@ -185,7 +185,7 @@ const getOptions = (options: FormField['options']) => {
           v-model="formData[field.name]"
           :placeholder="field.placeholder"
           :required="field.required"
-          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-sky-600/50 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
+          class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-slate-500 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
         />
 
         <div
@@ -213,20 +213,3 @@ const getOptions = (options: FormField['options']) => {
     </form>
   </div>
 </template>
-
-<style scoped>
-.suggestions-list {
-  border: 1px solid #ccc;
-  background-color: white;
-  z-index: 10;
-  width: 100%;
-  max-height: 150px;
-  overflow-y: auto;
-}
-.suggestion-item {
-  padding: 8px;
-}
-.suggestion-item:hover {
-  background-color: #f0f0f0;
-}
-</style>

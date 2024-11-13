@@ -134,7 +134,7 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
         v-model="searchQuery"
         type="text"
         placeholder="Search"
-        class="p-2 border border-sky-700/30 rounded-lg w-1/2 md:w-1/4 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-sky-600/50 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
+        class="p-2 border border-sky-700/30 rounded-lg w-1/2 md:w-1/4 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-slate-500 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
       />
     </div>
     <div class="overflow-x-auto md:overflow-hidden">
@@ -147,7 +147,7 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
             <th
               v-for="header in headers"
               :key="header.actual"
-              class="px-2 py-3 md:px-4 text-center text-xs md:text-sm font-medium uppercase tracking-wider"
+              class="px-2 py-3 md:px-4 text-center text-sm md:text-base font-semibold uppercase tracking-wider"
             >
               {{ header.display }}
             </th>
@@ -234,12 +234,3 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-.cursor-default {
-  cursor: default;
-}
-</style>
