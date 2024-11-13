@@ -203,7 +203,7 @@ onMounted(fetchUsers)
       <div class="mb-12 flex flex-col items-center">
         <button
           @click="toggleForm"
-          class="bg-sky-200/40 hover:bg-sky-200/60 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
+          class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
         >
           <span v-if="!showForm">Create New User</span>
           <span v-else>Close Form</span>
@@ -262,7 +262,7 @@ onMounted(fetchUsers)
       <div class="flex justify-center mt-6">
         <router-link to="/SHome">
           <button
-            class="bg-sky-200/40 hover:bg-sky-200/60 text-sky-900 font-medium py-3 px-6 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
+            class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 font-medium py-3 px-6 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
           >
             Back to Home
           </button>
