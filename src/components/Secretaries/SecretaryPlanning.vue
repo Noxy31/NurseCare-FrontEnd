@@ -18,8 +18,8 @@ interface CalendarEvent {
 interface AppointmentFormData {
   date: string
   time: string
-  patientId: number
-  nurseId: number
+  idClient: number
+  idUser: number
 }
 
 const showToast = ref(false)
@@ -28,6 +28,9 @@ const toastType = ref<'success' | 'error'>('success')
 const showForm = ref(false)
 const events = ref<CalendarEvent[]>([])
 const selectedDate = ref<Date>(new Date())
+
+const patientSuggestions = ref<{ label: string; value: number }[]>([]);
+const nurseSuggestions = ref<{ label: string; value: number }[]>([]);
 
 const formFields = computed((): FormField[] => [
   {
@@ -45,18 +48,18 @@ const formFields = computed((): FormField[] => [
     default: '',
   },
   {
-    name: 'patientId',
+    name: 'idClient',
     label: 'Patient',
     type: 'text',
-    suggestions: [],
+    suggestions: patientSuggestions.value,
   },
   {
-    name: 'nurseId',
+    name: 'idUser',
     label: 'Nurse',
     type: 'text',
-    suggestions: [],
+    suggestions: nurseSuggestions.value,
   },
-])
+]);
 
 const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
@@ -66,8 +69,8 @@ const showNotification = (message: string, type: 'success' | 'error') => {
 
 const fetchEvents = async () => {
   try {
-    const response = await fetch('/api/events/get-events')
-    if (!response.ok) throw new Error('Failed to fetch events')
+    const response = await fetch('/api/appointment/get-appointment')
+    if (!response.ok) throw new Error('Failed to fetch appointments')
     const data = await response.json()
     events.value = data.map((event: any) => ({
       ...event,
@@ -75,21 +78,61 @@ const fetchEvents = async () => {
       date: new Date(event.date),
     }))
   } catch (error) {
-    console.error('Error fetching events:', error)
-    showNotification('Failed to load events', 'error')
+    console.error('Error fetching appointments:', error)
+    showNotification('Failed to load appointments', 'error')
   }
 }
+
+const fetchSuggestions = async () => {
+  try {
+    // Récupération des patients
+    console.log('Fetching patients...');
+    const patientResponse = await fetch('/api/client/get-client-names');
+    if (!patientResponse.ok) {
+      throw new Error('Failed to fetch patients');
+    }
+    const patients = await patientResponse.json();
+    console.log('Raw patients data:', patients);
+
+    patientSuggestions.value = patients.map((patient: any) => ({
+      label: patient.clientName,
+      value: patient.idClient,
+    }));
+
+    console.log('Formatted patient suggestions:', patientSuggestions.value);
+
+    // Récupération des infirmières
+    console.log('Fetching nurses...');
+    const nurseResponse = await fetch('/api/users/get-nurses');
+    if (!nurseResponse.ok) {
+      throw new Error('Failed to fetch nurses');
+    }
+    const nurses = await nurseResponse.json();
+    console.log('Raw nurses data:', nurses);
+
+    nurseSuggestions.value = nurses.map((nurse: any) => ({
+      label: nurse.userName,
+      value: nurse.idUser,
+    }));
+
+    console.log('Formatted nurse suggestions:', nurseSuggestions.value);
+
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    showNotification('Failed to load suggestions', 'error');
+  }
+};
 
 const handleFormSubmit = async (formData: Record<string, any>) => {
   try {
     const eventData: AppointmentFormData = {
       date: formData.date,
       time: formData.time,
-      patientId: formData.patientId,
-      nurseId: formData.nurseId,
+      idClient: formData.idClient,
+      idUser: formData.idUser,
     }
 
-    const response = await fetch('/api/events/create-event', {
+    const response = await fetch('/api/appointment/create-apppointment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,13 +140,13 @@ const handleFormSubmit = async (formData: Record<string, any>) => {
       body: JSON.stringify(eventData),
     })
 
-    if (!response.ok) throw new Error('Failed to create event')
+    if (!response.ok) throw new Error('Failed to create appointment')
 
     await fetchEvents()
     showNotification('Appointment created successfully', 'success')
     showForm.value = false
   } catch (error) {
-    console.error('Error creating event:', error)
+    console.error('Error creating appointment:', error)
     showNotification('Failed to create appointment', 'error')
   }
 }
@@ -128,7 +171,10 @@ const handleNewEventClick = () => {
   showForm.value = true
 }
 
-onMounted(fetchEvents)
+onMounted(() => {
+  fetchEvents();
+  fetchSuggestions();
+});
 </script>
 
 <template>
