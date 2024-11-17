@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import SideNav from '@/components/SideNav.vue'
+import SideNav from '@/components/Secretaries/SideNavSecretary.vue'
 
 const userName = ref<string | null>(null)
 

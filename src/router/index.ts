@@ -6,6 +6,7 @@ import AccessDenied from '@/components/AccessDenied.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
 import ManageUsers from '@/components/Secretaries/ManageUsers.vue'
+import SecretaryPlanning from '@/components/Secretaries/SecretaryPlanning.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -31,6 +32,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/SHome',
     name: 'SecretaryHome',
     component: SecretaryHome,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/SPlanning',
+    name: 'SecretaryPlanning',
+    component: SecretaryPlanning,
     meta: { requiresAuth: true }
   },
   {

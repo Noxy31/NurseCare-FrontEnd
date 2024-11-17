@@ -5,7 +5,7 @@ import type { PropType } from 'vue'
 export interface FormField {
   name: string
   label: string
-  type: 'text' | 'email' | 'password' | 'toggle' | 'date' | 'select' | 'number'
+  type: 'text' | 'email' | 'password' | 'toggle' | 'date' | 'time' | 'select' | 'number'
   placeholder?: string
   default?: string | boolean | number
   options?:
@@ -123,7 +123,7 @@ const getOptions = (options: FormField['options']) => {
 
         <div v-else-if="field.suggestions" class="relative">
           <input
-            type="text"
+            :type="field.type"
             :name="field.name"
             v-model="formData[field.name]"
             :placeholder="field.placeholder"
@@ -175,6 +175,8 @@ const getOptions = (options: FormField['options']) => {
           v-model="formData[field.name]"
           :placeholder="field.placeholder"
           :required="field.required"
+          :min="field.type === 'time' ? '00:00' : undefined"
+          :max="field.type === 'time' ? '23:59' : undefined"
           class="mt-1 block w-full p-2.5 rounded-lg border border-sky-700/30 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-slate-500 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
         />
 

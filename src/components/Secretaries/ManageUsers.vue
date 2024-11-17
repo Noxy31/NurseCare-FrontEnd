@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import SideNav from '@/components/SideNav.vue'
+import SideNav from '@/components/Secretaries/SideNavSecretary.vue'
 import DataTable from '../DataTab.vue'
 import type { TableItem } from '../DataTab.vue'
 import DynamicForm from '../DynamicForm.vue'

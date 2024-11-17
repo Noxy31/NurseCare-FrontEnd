@@ -31,7 +31,7 @@ const logout = () => {
       </router-link>
 
       <router-link
-        to="/Splanning"
+        to="/SPlanning"
         class="p-3 text-sky-900 hover:bg-sky-200/70 hover:text-sky-950 rounded-lg transition-all duration-200 flex items-center gap-3"
       >
         <Calendar class="h-5 w-5" />

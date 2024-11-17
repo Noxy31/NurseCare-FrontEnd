@@ -7,17 +7,16 @@ import {
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
-  isSameDay
+  isSameDay,
+  isSameMonth,
+  subDays,
+  addDays
 } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 interface CalendarEvent {
   id: number | string;
   date: Date;
   time: string;
-  title: string;
-  description?: string;
-  color?: string;
   [key: string]: any;
 }
 
@@ -27,66 +26,25 @@ interface CalendarDay {
   isCurrentMonth: boolean;
 }
 
-interface CustomField {
-  name: string;
-  label: string;
-  type: 'text' | 'select' | 'date' | 'time';
-  options?: Array<{ value: string | number; label: string }>;
-}
-
-interface EventForm {
-  date: string;
-  time: string;
-  title: string;
-  description?: string;
-  [key: string]: any;
-}
-
-
 interface Props {
   events: CalendarEvent[];
-  customFields?: CustomField[];
   readOnly?: boolean;
   locale?: string;
-  addEventButtonLabel?: string;
-  modalCreateTitle?: string;
-  modalEditTitle?: string;
-  createButtonLabel?: string;
-  saveButtonLabel?: string;
-  cancelButtonLabel?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  customFields: () => [],
   readOnly: false,
-  locale: 'fr',
-  addEventButtonLabel: 'Nouvel événement',
-  modalCreateTitle: 'Nouvel événement',
-  modalEditTitle: 'Modifier l\'événement',
-  createButtonLabel: 'Créer',
-  saveButtonLabel: 'Enregistrer',
-  cancelButtonLabel: 'Annuler'
+  locale: 'en'
 });
 
 const emit = defineEmits<{
-  (e: 'event-created', event: Omit<CalendarEvent, 'id'>): void;
-  (e: 'event-updated', event: CalendarEvent): void;
-  (e: 'date-selected', date: Date): void;
-  (e: 'event-selected', event: CalendarEvent): void;
+  (e: 'new-event-click'): void;
+  (e: 'event-click', event: CalendarEvent): void;
+  (e: 'date-click', date: Date): void;
 }>();
 
-// État
 const currentDate = ref<Date>(new Date());
-const showEventModal = ref<boolean>(false);
-const editingEvent = ref<CalendarEvent | null>(null);
-  const eventForm = ref<EventForm>({
-  date: format(new Date(), 'yyyy-MM-dd'),
-  time: '',
-  title: '',
-  description: ''
-});
 
-// Jours de la semaine selon la locale
 const weekDays = computed(() => {
   const days = props.locale === 'fr'
     ? ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
@@ -94,25 +52,31 @@ const weekDays = computed(() => {
   return days;
 });
 
-// Computed properties
 const currentMonthYear = computed(() => {
-  return format(currentDate.value, 'MMMM yyyy', {
-    locale: props.locale === 'fr' ? fr : undefined
-  });
+  return format(currentDate.value, 'MMMM yyyy');
 });
 
 const calendarDays = computed((): CalendarDay[] => {
   const start = startOfMonth(currentDate.value);
   const end = endOfMonth(currentDate.value);
 
-  return eachDayOfInterval({ start, end }).map(date => ({
+  let firstDay = start.getDay();
+  firstDay = firstDay === 0 ? 6 : firstDay - 1;
+
+  const realStart = subDays(start, firstDay);
+
+  const endDay = end.getDay();
+  const daysToAdd = endDay === 0 ? 0 : 7 - endDay;
+  const realEnd = addDays(end, daysToAdd);
+
+  return eachDayOfInterval({ start: realStart, end: realEnd }).map(date => ({
     date,
     dayNumber: format(date, 'd'),
-    isCurrentMonth: true
+    isCurrentMonth: isSameMonth(date, currentDate.value)
   }));
 });
 
-// Méthodes
+// Methods
 const hasEvents = (date: Date): boolean => {
   return props.events.some(evt => isSameDay(new Date(evt.date), date));
 };
@@ -122,7 +86,11 @@ const getEventsForDate = (date: Date): CalendarEvent[] => {
 };
 
 const handleDateClick = (day: CalendarDay): void => {
-  emit('date-selected', day.date);
+  emit('date-click', day.date);
+};
+
+const handleEventClick = (event: CalendarEvent): void => {
+  emit('event-click', event);
 };
 
 const nextMonth = (): void => {
@@ -131,69 +99,6 @@ const nextMonth = (): void => {
 
 const previousMonth = (): void => {
   currentDate.value = subMonths(currentDate.value, 1);
-};
-
-const openNewEventModal = (): void => {
-  editingEvent.value = null;
-  eventForm.value = {
-    date: format(new Date(), 'yyyy-MM-dd'),
-    time: '',
-    title: '',
-    description: '',
-    ...props.customFields?.reduce((acc, field) => ({
-      ...acc,
-      [field.name]: ''
-    }), {})
-  };
-  showEventModal.value = true;
-};
-
-const editEvent = (event: CalendarEvent): void => {
-  emit('event-selected', event);
-  editingEvent.value = event;
-  eventForm.value = {
-    date: format(new Date(event.date), 'yyyy-MM-dd'),
-    time: event.time,
-    title: event.title,
-    description: event.description,
-    ...props.customFields?.reduce((acc, field) => ({
-      ...acc,
-      [field.name]: event[field.name as keyof CalendarEvent]
-    }), {})
-  };
-  showEventModal.value = true;
-};
-
-const saveEvent = (): void => {
-  const eventData = {
-    date: new Date(eventForm.value.date),
-    time: eventForm.value.time,
-    title: eventForm.value.title,
-    description: eventForm.value.description,
-    ...props.customFields?.reduce((acc, field) => ({
-      ...acc,
-      [field.name]: eventForm.value[field.name]
-    }), {})
-  };
-
-  if (editingEvent.value) {
-    emit('event-updated', { ...eventData, id: editingEvent.value.id });
-  } else {
-    emit('event-created', eventData);
-  }
-
-  closeModal();
-};
-
-const closeModal = (): void => {
-  showEventModal.value = false;
-  editingEvent.value = null;
-  eventForm.value = {
-    date: '',
-    time: '',
-    title: '',
-    description: ''
-  };
 };
 </script>
 
@@ -205,7 +110,7 @@ const closeModal = (): void => {
           @click="previousMonth"
           class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
         >
-          <span class="sr-only">Mois précédent</span>
+          <span class="sr-only">Previous month</span>
           &lt;
         </button>
         <h2 class="text-xl font-semibold text-sky-900">{{ currentMonthYear }}</h2>
@@ -213,17 +118,17 @@ const closeModal = (): void => {
           @click="nextMonth"
           class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
         >
-          <span class="sr-only">Mois suivant</span>
+          <span class="sr-only">Next month</span>
           &gt;
         </button>
       </div>
 
       <button
         v-if="!readOnly"
-        @click="openNewEventModal"
+        @click="$emit('new-event-click')"
         class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
       >
-        {{ addEventButtonLabel }}
+        New Appointment
       </button>
     </div>
 
@@ -259,114 +164,12 @@ const closeModal = (): void => {
           <div
             v-for="event in getEventsForDate(date.date)"
             :key="event.id"
-            @click.stop="!readOnly && editEvent(event)"
-            :class="[
-              'p-2 rounded text-xs cursor-pointer transition-colors duration-200 truncate',
-              event.color || 'bg-sky-700/40 hover:bg-sky-700/60 text-sky-900'
-            ]"
+            @click.stop="!readOnly && handleEventClick(event)"
+            class="p-2 rounded text-xs cursor-pointer transition-colors duration-200 truncate bg-sky-700/40 hover:bg-sky-700/60 text-sky-900"
           >
-            <div class="font-medium">{{ event.time }} - {{ event.title }}</div>
-            <div v-if="event.description" class="text-xs opacity-75 truncate">
-              {{ event.description }}
-            </div>
+            <div class="font-medium">{{ event.time }} - {{ event.title || 'Event' }}</div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Modal générique pour ajouter/éditer un événement -->
-    <div
-      v-if="showEventModal"
-      class="fixed inset-0 bg-sky-900/50 backdrop-blur-sm flex items-center justify-center"
-    >
-      <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-        <h3 class="text-xl font-semibold text-sky-900 mb-4">
-          {{ editingEvent ? modalEditTitle : modalCreateTitle }}
-        </h3>
-
-        <form @submit.prevent="saveEvent" class="space-y-4">
-          <!-- Champs par défaut -->
-          <div>
-            <label class="block text-sm font-medium text-sky-900 mb-1">Date</label>
-            <input
-              type="date"
-              v-model="eventForm.date"
-              class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-sky-900 mb-1">Heure</label>
-            <input
-              type="time"
-              v-model="eventForm.time"
-              class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-sky-900 mb-1">Titre</label>
-            <input
-              type="text"
-              v-model="eventForm.title"
-              class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-sky-900 mb-1">Description</label>
-            <textarea
-              v-model="eventForm.description"
-              class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-              rows="2"
-            ></textarea>
-          </div>
-
-          <!-- Champs personnalisés dynamiques -->
-          <template v-for="field in customFields" :key="field.name">
-            <div>
-              <label class="block text-sm font-medium text-sky-900 mb-1">{{ field.label }}</label>
-
-              <template v-if="field.type === 'select'">
-                <select
-                  v-model="eventForm[field.name]"
-                  class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-                >
-                  <option v-for="option in field.options" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </template>
-
-              <template v-else>
-                <input
-                  :type="field.type"
-                  v-model="eventForm[field.name]"
-                  class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-                />
-              </template>
-            </div>
-          </template>
-
-          <div class="flex justify-end gap-3 mt-6">
-            <button
-              type="button"
-              @click="closeModal"
-              class="bg-sky-800/40 hover:bg-sky-800/60 text-sky-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-            >
-              {{ cancelButtonLabel }}
-            </button>
-            <button
-              type="submit"
-              class="bg-emerald-600/40 hover:bg-emerald-600/60 text-emerald-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-            >
-              {{ editingEvent ? saveButtonLabel : createButtonLabel }}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>
