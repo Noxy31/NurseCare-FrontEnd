@@ -2,11 +2,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DynamicForm from './DynamicForm.vue'
+import ToastNotification from './ToastNotification.vue'
 import type { FormField } from './DynamicForm.vue'
 import '@/assets/logo/NurseCare-Logo.png'
 
 const loading = ref(false)
 const router = useRouter()
+
+
+const showToast = ref(false)
+const toastMessage = ref('')
+const toastType = ref<'success' | 'error'>('success')
 
 const loginFields: FormField[] = [
   {
@@ -24,6 +30,12 @@ const loginFields: FormField[] = [
     default: '',
   },
 ]
+
+const showNotification = (message: string, type: 'success' | 'error') => {
+  toastMessage.value = message
+  toastType.value = type
+  showToast.value = true
+}
 
 const handleLogin = async (formData: Record<string, string>) => {
   if (loading.value) return
@@ -43,12 +55,17 @@ const handleLogin = async (formData: Record<string, string>) => {
     if (!response.ok) {
       const errorData = await response.json()
       console.error('Server response:', errorData)
+      showNotification(errorData.message || 'Login failed', 'error')
       throw new Error(errorData.message || 'Login failed')
     }
 
     const data = await response.json()
     console.log('Login successful:', data.message)
-    router.push('/SHome')
+    showNotification('Login successful! Redirecting...', 'success')
+
+    setTimeout(() => {
+      router.push('/SHome')
+    }, 1000)
   } catch (error) {
     console.error('Error during login:', error)
   } finally {
@@ -59,6 +76,13 @@ const handleLogin = async (formData: Record<string, string>) => {
 
 <template>
   <div class="relative flex flex-col min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50 p-4">
+    <ToastNotification
+      v-if="showToast"
+      :message="toastMessage"
+      :type="toastType"
+      @close="showToast = false"
+    />
+
     <div class="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
       <img
         src="@/assets/logo/NurseCare-Logo.png"

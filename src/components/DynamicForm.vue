@@ -29,13 +29,9 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  isAdminEnabled: {
-    type: Boolean,
-    default: false,
-  },
 })
 
-const emit = defineEmits(['submit', 'client-change', 'input'])
+const emit = defineEmits(['submit', 'client-change', 'input', 'validation-error'])
 
 const formData = reactive(
   props.fields.reduce(
@@ -83,15 +79,9 @@ const submitForm = () => {
   })
 
   if (isValid) {
-    const emittedData = { ...formData }
-
-    if (props.isAdminEnabled) {
-      emittedData.isAdmin = emittedData.isAdmin ? 1 : 0
-    }
-
-    emit('submit', emittedData)
+    emit('submit', formData)
   } else {
-    alert('Please fill in all required fields correctly.')
+    emit('validation-error')
   }
 }
 
