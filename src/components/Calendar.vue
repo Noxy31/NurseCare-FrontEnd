@@ -76,7 +76,7 @@ const calendarDays = computed((): CalendarDay[] => {
   }));
 });
 
-// Methods
+// Methods starts here
 const hasEvents = (date: Date): boolean => {
   return props.events.some(evt => isSameDay(new Date(evt.date), date));
 };
@@ -105,7 +105,7 @@ const previousMonth = (): void => {
 <template>
   <div class="bg-sky-900/20 backdrop-blur-md p-4 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-sky-700/20">
     <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-4">
+      <div class="flex items-center">
         <button
           @click="previousMonth"
           class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
@@ -113,7 +113,7 @@ const previousMonth = (): void => {
           <span class="sr-only">Previous month</span>
           &lt;
         </button>
-        <h2 class="text-xl font-semibold text-sky-900">{{ currentMonthYear }}</h2>
+        <h2 class="text-xl font-semibold text-sky-900 w-48 text-center">{{ currentMonthYear }}</h2>
         <button
           @click="nextMonth"
           class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
@@ -145,16 +145,19 @@ const previousMonth = (): void => {
         v-for="date in calendarDays"
         :key="date.date.toISOString()"
         :class="[
-          'min-h-[120px] p-2 relative transition-colors duration-200',
-          date.isCurrentMonth ? 'bg-sky-900/5' : 'bg-sky-900/10',
-          hasEvents(date.date) ? 'bg-sky-800/20' : ''
+          'min-h-[120px] p-2 relative cursor-pointer',
+          'transition-all duration-200 ease-in-out transform',
+          date.isCurrentMonth
+            ? 'bg-sky-900/5 hover:bg-sky-800/10 hover:scale-[1.02] hover:z-10'
+            : 'bg-sky-900/20',
+          hasEvents(date.date) ? 'bg-sky-800/20 hover:bg-sky-800/30' : ''
         ]"
         @click="!readOnly && handleDateClick(date)"
       >
         <span
           :class="[
             'absolute top-1 right-2 text-sm',
-            date.isCurrentMonth ? 'text-sky-900' : 'text-sky-900/60'
+            date.isCurrentMonth ? 'text-sky-900' : 'text-sky-900/40'
           ]"
         >
           {{ date.dayNumber }}

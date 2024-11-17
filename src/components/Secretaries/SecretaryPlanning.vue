@@ -34,26 +34,28 @@ const formFields = computed((): FormField[] => [
     name: 'date',
     label: 'Date',
     type: 'date',
-    default: selectedDate.value ? format(selectedDate.value, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')
+    default: selectedDate.value
+      ? format(selectedDate.value, 'yyyy-MM-dd')
+      : format(new Date(), 'yyyy-MM-dd'),
   },
   {
     name: 'time',
     label: 'Time',
     type: 'time',
-    default: ''
+    default: '',
   },
   {
     name: 'patientId',
     label: 'Patient',
     type: 'text',
-    suggestions: []
+    suggestions: [],
   },
   {
     name: 'nurseId',
     label: 'Nurse',
     type: 'text',
-    suggestions: []
-  }
+    suggestions: [],
+  },
 ])
 
 const showNotification = (message: string, type: 'success' | 'error') => {
@@ -110,9 +112,15 @@ const handleEventClick = (event: CalendarEvent) => {
   console.log('Event clicked:', event)
 }
 
+const formRef = ref()
+
 const handleDateClick = (date: Date) => {
   selectedDate.value = date
-  showForm.value = true
+  if (showForm.value) {
+    formRef.value?.updateField('date', format(date, 'yyyy-MM-dd'))
+  } else {
+    showForm.value = true
+  }
 }
 
 const handleNewEventClick = () => {
@@ -167,6 +175,7 @@ onMounted(fetchEvents)
           </div>
 
           <DynamicForm
+            ref="formRef"
             :fields="formFields"
             submit-label="Create Appointment"
             @submit="handleFormSubmit"

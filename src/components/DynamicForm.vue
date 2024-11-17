@@ -43,6 +43,13 @@ const formData = reactive(
   ),
 )
 
+//Méthode pour mettre a jour un champ via un event
+const updateField = (fieldName: string, value: any) => {
+  if (fieldName in formData) {
+    formData[fieldName] = value
+  }
+}
+
 const filteredSuggestions = ref<
   Record<string, { label: string; value: string | number }[]>
 >({})
@@ -88,6 +95,10 @@ const submitForm = () => {
 const getOptions = (options: FormField['options']) => {
   return typeof options === 'function' ? options() : options || []
 }
+
+defineExpose({
+  updateField
+})
 </script>
 
 <template>
