@@ -69,7 +69,6 @@ const filterSuggestions = (field: FormField) => {
     return
   }
 
-  // Utilisation de displayValues au lieu de formData pour le filtrage
   const inputValue = displayValues[field.name]
 
   if (!inputValue) {
