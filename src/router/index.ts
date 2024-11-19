@@ -7,6 +7,7 @@ import ErrorPage from '@/components/ErrorPage.vue'
 import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
 import ManageUsers from '@/components/Secretaries/ManageUsers.vue'
 import SecretaryPlanning from '@/components/Secretaries/SecretaryPlanning.vue'
+import ManagePatients from '@/components/Secretaries/ManagePatients.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -44,6 +45,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/users',
     name: 'ManageUsers',
     component: ManageUsers,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/patients',
+    name: 'ManagePatients',
+    component: ManagePatients,
     meta: { requiresAuth: true }
   },
 ]

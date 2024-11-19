@@ -32,6 +32,7 @@ const selectedDate = ref<Date>(new Date())
 const patientSuggestions = ref<{ label: string; value: number }[]>([]);
 const nurseSuggestions = ref<{ label: string; value: number }[]>([]);
 
+// Initialisation des champs pour le formulaire
 const formFields = computed((): FormField[] => [
   {
     name: 'date',
@@ -61,12 +62,14 @@ const formFields = computed((): FormField[] => [
   },
 ]);
 
+// Initialisation des toasts de notif
 const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
   toastType.value = type
   showToast.value = true
 }
 
+//Récupération des evenements du calendrier (planning)
 const fetchEvents = async () => {
   try {
     const response = await fetch('/api/appointment/get-appointment')
@@ -82,6 +85,7 @@ const fetchEvents = async () => {
     showNotification('Failed to load appointments', 'error')
   }
 }
+
 
 const fetchSuggestions = async () => {
   try {

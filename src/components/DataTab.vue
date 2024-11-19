@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 
 export interface TableItem {
   [key: string]: string | number | boolean | undefined
+  isNew?: boolean
+  isEditing?: boolean
 }
 
 interface ValueMapping {
@@ -75,7 +77,6 @@ const handleCheck = (item: TableItem, event: Event) => {
   }
 }
 
-// Méthode pour le mapping qui permet de changer des valeurs par d'autres dans le tableau (par ex changer un 1 en un string)
 const formatValue = (value: any, header: string) => {
   const mapping = props.valueMappings?.find((m) => m.field === header)
   if (mapping && mapping.values[value] !== undefined) {
@@ -141,7 +142,7 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
       <table class="min-w-full divide-y divide-sky-700/20 text-sm md:text-base">
         <thead class="bg-sky-900/30 text-sky-900">
           <tr>
-            <th v-if="isCheckable" class="px-2 py-3 md:px-4 text-center">
+            <th v-if="isCheckable" class="px-2 py-3 md:px-4 text-center w-12">
               <input type="checkbox" class="rounded border-sky-700/40" />
             </th>
             <th
@@ -151,10 +152,10 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
             >
               {{ header.display }}
             </th>
-            <th class="px-2 py-3 md:px-4"></th>
+            <th class="px-2 py-3 md:px-4 w-48"></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-sky-700/20">
+        <TransitionGroup tag="tbody" class="divide-y divide-sky-700/20" name="list" appear>
           <tr
             v-for="(item, index) in filteredItems"
             :key="item[rowKey]?.toString() || index"
@@ -163,12 +164,14 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
               'cursor-pointer': isClickable && !item.isEditing,
               'cursor-default': !isClickable || item.isEditing,
               'hover:bg-sky-800/20': isClickable && !item.isEditing,
-              'transition-colors duration-200': true,
-              'bg-sky-900/10': index % 2 === 0,
-              'bg-sky-900/5': index % 2 === 1,
+              'transition-all duration-300': true,
+              'bg-sky-900/10': index % 2 === 0 && !item.isEditing && !item.isNew,
+              'bg-sky-900/5': index % 2 === 1 && !item.isEditing && !item.isNew,
+              'highlight-new': item.isNew,
+              'editing-row': item.isEditing,
             }"
           >
-            <td v-if="isCheckable" class="px-2 py-2 md:px-4 text-center">
+            <td v-if="isCheckable" class="px-2 py-2 md:px-4 text-center w-12">
               <input
                 type="checkbox"
                 :checked="isSelected(item)"
@@ -181,56 +184,144 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
               :key="header.actual"
               class="px-2 py-2 md:px-4 text-center text-sky-900"
             >
-              <template v-if="item.isEditing">
-                <input
-                  v-model="item[header.actual]"
-                  class="w-full md:w-auto p-2 border border-sky-700/30 rounded-lg bg-sky-900/10 backdrop-blur-sm text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
-                />
-              </template>
-              <template v-else>
-                <div class="truncate max-w-[100px] md:max-w-full relative">
-                  {{ formatValue(item[header.actual], header.actual) }}
-                </div>
-              </template>
-            </td>
-            <td class="px-2 py-2 md:px-4 whitespace-nowrap text-center">
-              <template v-if="item.isEditing">
-                <button
-                  @click="saveEdit(item, $event)"
-                  class="bg-emerald-600/40 hover:bg-emerald-600/60 text-emerald-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow-md"
-                >
-                  Validate
-                </button>
-                <button
-                  @click="cancelEdit(item, $event)"
-                  class="bg-sky-800/40 hover:bg-sky-800/60 text-sky-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 ml-2 text-xs md:text-sm shadow-sm hover:shadow-md"
-                >
-                  Cancel
-                </button>
-              </template>
-              <template v-else>
-                <template v-if="isCheckable">
-                  <span class="text-sky-900">Select</span>
+              <Transition name="fade" mode="out-in">
+                <template v-if="item.isEditing">
+                  <div class="max-w-full overflow-hidden">
+                    <input
+                      v-model="item[header.actual]"
+                      class="w-full p-2 border border-sky-700/30 rounded-lg bg-sky-100/20 text-sky-900 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-all duration-300"
+                    />
+                  </div>
                 </template>
                 <template v-else>
-                  <button
-                    @click="startEdit(item, $event)"
-                    class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow-md"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    @click="deleteItem(item, $event)"
-                    class="bg-red-900/50 hover:bg-red-900/70 text-sky-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 ml-2 md:ml-4 text-xs md:text-sm shadow-sm hover:shadow-md"
-                  >
-                    Delete
-                  </button>
+                  <div class="truncate max-w-[200px] md:max-w-[300px] mx-auto">
+                    {{ formatValue(item[header.actual], header.actual) }}
+                  </div>
                 </template>
-              </template>
+              </Transition>
+            </td>
+            <td class="px-2 py-2 md:px-4 text-center w-48 shrink-0">
+              <div class="flex justify-center items-center gap-2">
+                <Transition name="fade" mode="out-in">
+                  <template v-if="item.isEditing">
+                    <div class="flex gap-2">
+                      <button
+                        @click="saveEdit(item, $event)"
+                        class="bg-emerald-600/40 hover:bg-emerald-600/60 text-emerald-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow-md whitespace-nowrap"
+                      >
+                        Validate
+                      </button>
+                      <button
+                        @click="cancelEdit(item, $event)"
+                        class="bg-sky-800/40 hover:bg-sky-800/60 text-sky-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow-md whitespace-nowrap"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <template v-if="isCheckable">
+                      <span class="text-sky-900">Select</span>
+                    </template>
+                    <template v-else>
+                      <div class="flex gap-2">
+                        <button
+                          @click="startEdit(item, $event)"
+                          class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow-md whitespace-nowrap"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          @click="deleteItem(item, $event)"
+                          class="bg-red-900/50 hover:bg-red-900/70 text-sky-900 font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-xs md:text-sm shadow-sm hover:shadow-md whitespace-nowrap"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </template>
+                  </template>
+                </Transition>
+              </div>
             </td>
           </tr>
-        </tbody>
+        </TransitionGroup>
       </table>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Animation pour les nouvelles lignes */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.editing-input {
+  @apply bg-sky-900/10 backdrop-blur-sm;
+  animation: fadeBackground 0.3s ease-out;
+}
+
+@keyframes fadeBackground {
+  from {
+    background-color: transparent;
+    backdrop-filter: blur(0);
+  }
+  to {
+    background-color: rgba(3, 105, 161, 0.1);
+    backdrop-filter: blur(4px);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Animation pour les nouvelles lignes */
+.highlight-new {
+  animation: highlightNew 2s ease-out;
+}
+
+@keyframes highlightNew {
+  0% {
+    background-color: rgba(14, 165, 233, 0.2);
+    transform: translateY(-30px);
+  }
+  50% {
+    background-color: rgba(14, 165, 233, 0.2);
+  }
+  100% {
+    background-color: transparent;
+    transform: translateY(0);
+  }
+}
+
+/* Style pour le mode édition */
+.editing-row {
+  background-color: rgba(14, 165, 233, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+}
+</style>
