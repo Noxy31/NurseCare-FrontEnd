@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { format } from 'date-fns' // Ajout de l'import manquant
 import SideNav from '@/components/Secretaries/SideNavSecretary.vue'
 import Calendar from '../Calendar.vue'
+import { Teleport } from 'vue'
 import ToastNotification from '../ToastNotification.vue'
 import DynamicForm from '../DynamicForm.vue'
 import type { FormField } from '../DynamicForm.vue'
@@ -16,8 +17,10 @@ interface CalendarEvent {
 }
 
 interface AppointmentFormData {
-  date: string
-  time: string
+  appDate: Date
+  plannedAppTime: string
+  realAppTime: null
+  isDone: number
   idClient: number
   idUser: number
 }
@@ -35,7 +38,7 @@ const nurseSuggestions = ref<{ label: string; value: number }[]>([]);
 // Initialisation des champs pour le formulaire
 const formFields = computed((): FormField[] => [
   {
-    name: 'date',
+    name: 'appDate',
     label: 'Date',
     type: 'date',
     default: selectedDate.value
@@ -43,7 +46,7 @@ const formFields = computed((): FormField[] => [
       : format(new Date(), 'yyyy-MM-dd'),
   },
   {
-    name: 'time',
+    name: 'plannedAppTime',
     label: 'Time',
     type: 'time',
     default: '',
@@ -72,13 +75,19 @@ const showNotification = (message: string, type: 'success' | 'error') => {
 //Récupération des evenements du calendrier (planning)
 const fetchEvents = async () => {
   try {
-    const response = await fetch('/api/appointment/get-appointment')
+    const response = await fetch('/api/appointment/get-appointments-details')
     if (!response.ok) throw new Error('Failed to fetch appointments')
     const data = await response.json()
     events.value = data.map((event: any) => ({
-      ...event,
-      id: event.id || `temp-${Date.now()}-${Math.random()}`,
-      date: new Date(event.date),
+      id: event.idApp,
+      date: new Date(event.appDate),
+      time: event.plannedAppTime,
+      title: `${event.clientName || 'Unnamed Patient'} - ${event.nurseName || 'Unassigned'}`,
+      clientName: event.clientName,
+      nurseName: event.nurseName,
+      plannedAppTime: event.plannedAppTime,
+      realAppTime: event.realAppTime,
+      isDone: event.isDone
     }))
   } catch (error) {
     console.error('Error fetching appointments:', error)
@@ -130,13 +139,15 @@ const fetchSuggestions = async () => {
 const handleFormSubmit = async (formData: Record<string, any>) => {
   try {
     const eventData: AppointmentFormData = {
-      date: formData.date,
-      time: formData.time,
+      appDate: formData.appDate,
+      plannedAppTime: formData.plannedAppTime,
+      realAppTime: null,
+      isDone: 0,
       idClient: formData.idClient,
       idUser: formData.idUser,
     }
 
-    const response = await fetch('/api/appointment/create-apppointment', {
+    const response = await fetch('/api/appointment/create-appointment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -198,99 +209,137 @@ onMounted(() => {
           <h1 class="text-3xl md:text-4xl font-medium text-sky-900">Planning Management</h1>
         </div>
 
+        <!-- Calendrier avec son propre modal pour les détails des rendez-vous -->
         <Calendar
           :events="events"
+          modalTitle="Appointments"
           @new-event-click="handleNewEventClick"
           @event-click="handleEventClick"
           @date-click="handleDateClick"
-        />
+        >
+          <template #event-card="{ event }">
+            <div class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-sky-200/40">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 class="font-medium text-sky-900">Patient</h3>
+                  <p>{{ event.clientName }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Nurse</h3>
+                  <p>{{ event.nurseName }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Planned Time</h3>
+                  <p>{{ event.plannedAppTime }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Real Time</h3>
+                  <p>{{ event.realAppTime || 'Not completed' }}</p>
+                </div>
+                <div class="col-span-2">
+                  <span
+                    :class="[
+                      'px-3 py-1 rounded-full text-sm',
+                      event.isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
+                    ]"
+                  >
+                    {{ event.isDone ? 'Completed' : 'Pending' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </Calendar>
       </div>
 
-      <!-- Modal Overlay -->
-      <transition
-        enter-active-class="transition-all duration-300 ease-out"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-all duration-200 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div
-          v-if="showForm"
-          class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-          @click="showForm = false"
-        />
-      </transition>
-
-      <!-- Modal Content -->
-      <transition
-        enter-active-class="transition-all duration-300 ease-out"
-        enter-from-class="opacity-0 scale-95"
-        enter-to-class="opacity-100 scale-100"
-        leave-active-class="transition-all duration-200 ease-in"
-        leave-from-class="opacity-100 scale-100"
-        leave-to-class="opacity-0 scale-95"
-      >
-        <div
-          v-if="showForm"
-          class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
-          @click.stop
+      <!-- Modal de création de rendez-vous -->
+      <Teleport to="body">
+        <!-- Overlay -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
         >
-          <div class="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-2xl md:text-3xl font-medium text-sky-900">New Appointment</h2>
-              <button
-                @click="showForm = false"
-                class="text-sky-900/60 hover:text-sky-900 transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+          <div
+            v-if="showForm"
+            class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            @click="showForm = false"
+          />
+        </transition>
 
-            <DynamicForm
-              ref="formRef"
-              :fields="formFields"
-              submit-label="Create Appointment"
-              @submit="handleFormSubmit"
-              @validation-error="() => showNotification('Please fill all required fields', 'error')"
-            >
-              <template #buttons="{ isSubmitting }">
-                <div class="flex justify-end gap-4 mt-6">
-                  <button
-                    type="button"
-                    @click="showForm = false"
-                    class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors"
-                    :disabled="isSubmitting"
+        <!-- Contenu -->
+        <transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div
+            v-if="showForm"
+            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
+            @click.stop
+          >
+            <div class="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl md:text-3xl font-medium text-sky-900">New Appointment</h2>
+                <button
+                  @click="showForm = false"
+                  class="text-sky-900/60 hover:text-sky-900 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2"
-                    :disabled="isSubmitting"
-                  >
-                    <span v-if="isSubmitting">Creating...</span>
-                    <span v-else>Create Appointment</span>
-                  </button>
-                </div>
-              </template>
-            </DynamicForm>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <DynamicForm
+                ref="formRef"
+                :fields="formFields"
+                submit-label="Create Appointment"
+                @submit="handleFormSubmit"
+                @validation-error="() => showNotification('Please fill all required fields', 'error')"
+              >
+                <template #buttons="{ isSubmitting }">
+                  <div class="flex justify-end gap-4 mt-6">
+                    <button
+                      type="button"
+                      @click="showForm = false"
+                      class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors"
+                      :disabled="isSubmitting"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2"
+                      :disabled="isSubmitting"
+                    >
+                      <span v-if="isSubmitting">Creating...</span>
+                      <span v-else>Create Appointment</span>
+                    </button>
+                  </div>
+                </template>
+              </DynamicForm>
+            </div>
           </div>
-        </div>
-      </transition>
+        </transition>
+      </Teleport>
     </main>
   </div>
 </template>
