@@ -193,46 +193,104 @@ onMounted(() => {
         @close="showToast = false"
       />
 
-      <div class="flex gap-8">
-        <div
-          class="flex-1 bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
-        >
-          <div class="flex items-center gap-4 mb-8">
-            <h1 class="text-3xl md:text-4xl font-medium text-sky-900">Planning Management</h1>
-          </div>
-
-          <Calendar
-            :events="events"
-            @new-event-click="handleNewEventClick"
-            @event-click="handleEventClick"
-            @date-click="handleDateClick"
-          />
+      <div class="bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+        <div class="flex items-center gap-4 mb-8">
+          <h1 class="text-3xl md:text-4xl font-medium text-sky-900">Planning Management</h1>
         </div>
 
-        <!-- Form Panel -->
+        <Calendar
+          :events="events"
+          @new-event-click="handleNewEventClick"
+          @event-click="handleEventClick"
+          @date-click="handleDateClick"
+        />
+      </div>
+
+      <!-- Modal Overlay -->
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
         <div
           v-if="showForm"
-          class="w-96 bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/40"
-        >
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-medium text-sky-900">New Appointment</h2>
-            <button
-              @click="showForm = false"
-              class="text-sky-900/60 hover:text-sky-900 transition-colors"
-            >
-              ✕
-            </button>
-          </div>
+          class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          @click="showForm = false"
+        />
+      </transition>
 
-          <DynamicForm
-            ref="formRef"
-            :fields="formFields"
-            submit-label="Create Appointment"
-            @submit="handleFormSubmit"
-            @validation-error="() => showNotification('Please fill all required fields', 'error')"
-          />
+      <!-- Modal Content -->
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div
+          v-if="showForm"
+          class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
+          @click.stop
+        >
+          <div class="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl md:text-3xl font-medium text-sky-900">New Appointment</h2>
+              <button
+                @click="showForm = false"
+                class="text-sky-900/60 hover:text-sky-900 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <DynamicForm
+              ref="formRef"
+              :fields="formFields"
+              submit-label="Create Appointment"
+              @submit="handleFormSubmit"
+              @validation-error="() => showNotification('Please fill all required fields', 'error')"
+            >
+              <template #buttons="{ isSubmitting }">
+                <div class="flex justify-end gap-4 mt-6">
+                  <button
+                    type="button"
+                    @click="showForm = false"
+                    class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors"
+                    :disabled="isSubmitting"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2"
+                    :disabled="isSubmitting"
+                  >
+                    <span v-if="isSubmitting">Creating...</span>
+                    <span v-else>Create Appointment</span>
+                  </button>
+                </div>
+              </template>
+            </DynamicForm>
+          </div>
         </div>
-      </div>
+      </transition>
     </main>
   </div>
 </template>
