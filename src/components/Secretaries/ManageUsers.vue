@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import SideNav from '@/components/Secretaries/SideNavSecretary.vue'
 import DataTable from '../DataTab.vue'
+import NavBar from '@/components/NavBar.vue'
 import type { TableItem } from '../DataTab.vue'
 import DynamicForm from '../DynamicForm.vue'
 import type { FormField } from '../DynamicForm.vue'
@@ -22,6 +22,15 @@ interface CreateUserFormData {
   confirmPassword: string
   userRole: boolean
 }
+
+const secretaryNavItems = [
+  { name: 'Home', path: '/SHome', icon: 'Home' },
+  { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
+  { name: 'Bills', path: '/bills', icon: 'Receipt' },
+  { name: 'Patients', path: '/patients', icon: 'Users' },
+  { name: 'Users', path: '/users', icon: 'UserCog' },
+]
+
 const showForm = ref(false)
 const isLoading = ref(false)
 const router = useRouter()
@@ -208,7 +217,7 @@ onMounted(fetchUsers)
 
 <template>
   <div class="relative flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <SideNav />
+    <NavBar :navItems="secretaryNavItems" />
 
     <main class="flex-1 p-8 overflow-auto">
       <ToastNotification

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { format } from 'date-fns' // Ajout de l'import manquant
-import SideNav from '@/components/Secretaries/SideNavSecretary.vue'
+import { format } from 'date-fns'
+import NavBar from '@/components/NavBar.vue'
 import Calendar from '../Calendar.vue'
 import { Teleport } from 'vue'
 import ToastNotification from '../ToastNotification.vue'
@@ -24,6 +24,14 @@ interface AppointmentFormData {
   idClient: number
   idUser: number
 }
+
+const secretaryNavItems = [
+  { name: 'Home', path: '/SHome', icon: 'Home' },
+  { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
+  { name: 'Bills', path: '/bills', icon: 'Receipt' },
+  { name: 'Patients', path: '/patients', icon: 'Users' },
+  { name: 'Users', path: '/users', icon: 'UserCog' },
+]
 
 const showToast = ref(false)
 const toastMessage = ref('')
@@ -194,7 +202,7 @@ onMounted(() => {
 
 <template>
   <div class="relative flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <SideNav />
+    <NavBar :navItems="secretaryNavItems" />
 
     <main class="flex-1 p-8 overflow-auto">
       <ToastNotification

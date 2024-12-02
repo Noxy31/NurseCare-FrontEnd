@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import SideNav from '@/components/Secretaries/SideNavSecretary.vue'
+import NavBar from '@/components/NavBar.vue'
 
 const userName = ref<string | null>(null)
 
@@ -19,6 +19,14 @@ const fetchUserName = async () => {
   }
 }
 
+const secretaryNavItems = [
+  { name: 'Home', path: '/SHome', icon: 'Home' },
+  { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
+  { name: 'Bills', path: '/bills', icon: 'Receipt' },
+  { name: 'Patients', path: '/patients', icon: 'Users' },
+  { name: 'Users', path: '/users', icon: 'UserCog' },
+]
+
 onMounted(() => {
   fetchUserName()
 })
@@ -26,7 +34,7 @@ onMounted(() => {
 
 <template>
   <div class="relative flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <SideNav />
+    <NavBar :navItems="secretaryNavItems" />
 
     <main class="flex-1 p-8">
       <div class="flex items-center mb-8">
