@@ -26,10 +26,8 @@ onMounted(() => {
 
 <template>
   <div class="relative flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <!-- Barre de navigation -->
     <SideNav />
 
-    <!-- Contenu principal de la home Page -->
     <main class="flex-1 p-8">
       <div class="flex items-center mb-8">
         <p class="text-xl text-sky-900 font-poppins">

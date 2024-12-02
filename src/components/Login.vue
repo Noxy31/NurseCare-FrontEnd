@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import DynamicForm from './DynamicForm.vue'
 import ToastNotification from './ToastNotification.vue'
 import type { FormField } from './DynamicForm.vue'
+import Cookies from 'js-cookie'
 import '@/assets/logo/NurseCare-Logo.png'
 
 const loading = ref(false)
@@ -40,7 +41,6 @@ const showNotification = (message: string, type: 'success' | 'error') => {
 const handleLogin = async (formData: Record<string, string>) => {
   if (loading.value) return
   loading.value = true
-
   const normalFormData = { ...formData }
 
   try {
@@ -60,12 +60,32 @@ const handleLogin = async (formData: Record<string, string>) => {
     }
 
     const data = await response.json()
-    console.log('Login successful:', data.message)
+    console.log('Login successful:', data)
     showNotification('Login successful! Redirecting...', 'success')
 
+    const userRole = parseInt(data.user.role)
+
+    let redirectPath
+    switch (userRole) {
+      case 1:
+        redirectPath = '/MHome'
+        break
+      case 2:
+        redirectPath = '/SHome'
+        break
+      case 3:
+        redirectPath = '/NHome'
+        break
+      default:
+        redirectPath = '/access-denied'
+    }
+
+    console.log('Redirecting to:', redirectPath)
+
     setTimeout(() => {
-      router.push('/SHome')
+      router.push(redirectPath)
     }, 1000)
+
   } catch (error) {
     console.error('Error during login:', error)
   } finally {
