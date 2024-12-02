@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Menu, X, UserCircle, Users, Calendar as CalendarIcon, LogOut, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { Calendar, FileText, UserCircle } from 'lucide-vue-next'
+import NavBar from '@/components/NavBar.vue'
 import Cookies from 'js-cookie'
+import { useRouter} from 'vue-router'
+
+const router = useRouter()
 
 interface Appointment {
   idApp: number
@@ -10,8 +14,7 @@ interface Appointment {
   realAppTime: string | null
   isDone: boolean
   idClient: number
-  clientFirstName: string
-  clientLastName: string
+  clientName: string
   clientAddress: string
 }
 
@@ -19,6 +22,12 @@ const userName = ref<string | null>(null)
 const isMenuOpen = ref(false)
 const appointments = ref<Appointment[]>([])
 const currentAppointmentIndex = ref(0)
+
+const nurseNavItems = [
+  { name: 'Agenda', path: '/agenda', icon: 'Calendar' },
+  { name: 'Bills', path: '/bills', icon: 'FileText' },
+  { name: 'Profile', path: '/profile', icon: 'UserCircle' }
+]
 
 const fetchUserName = async () => {
   try {
@@ -37,7 +46,7 @@ const fetchUserName = async () => {
 
 const fetchTodayAppointments = async () => {
   try {
-    const response = await fetch('/api/appointments/nurse/today', {
+    const response = await fetch('/api/appointment/today-app', {
       credentials: 'include',
     })
     if (!response.ok) {
@@ -62,7 +71,7 @@ const previousAppointment = () => {
 }
 
 const formatTime = (time: string) => {
-  return time.substring(0, 5) // Assuming time format is "HH:MM:SS"
+  return time.substring(0, 5)
 }
 
 const logout = () => {
@@ -77,22 +86,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
-    <!-- Header -->
-    <header class="bg-white/30 backdrop-blur-md p-4 flex justify-between items-center">
-      <button
-        @click="isMenuOpen = !isMenuOpen"
-        class="p-2 rounded-lg hover:bg-indigo-100/50 transition-colors"
-      >
-        <Menu class="h-6 w-6 text-indigo-900" />
-      </button>
-      <div class="flex items-center gap-2">
-        <img src="@/assets/logo/NurseCare-Logo.png" alt="NurseCare" class="h-8 w-auto" />
-        <span class="text-lg font-medium text-indigo-900">NurseCare</span>
-      </div>
-    </header>
+   <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
+    <NavBar :navItems="nurseNavItems" />
 
-    <main class="p-4">
+    <main class="p-4 sm:p-8 sm:pl-64 pt-20 sm:pt-8">
       <!-- Welcome message -->
       <div class="mb-4">
         <p class="text-sm text-indigo-900/70">
@@ -121,8 +118,7 @@ onMounted(() => {
 
               <div class="space-y-2">
                 <h3 class="text-lg font-semibold text-indigo-900">
-                  {{ appointments[currentAppointmentIndex].clientFirstName }}
-                  {{ appointments[currentAppointmentIndex].clientLastName }}
+                  {{ appointments[currentAppointmentIndex].clientName }}
                 </h3>
                 <p class="text-indigo-900/70">
                   {{ appointments[currentAppointmentIndex].clientAddress }}

@@ -36,7 +36,7 @@ onMounted(() => {
   <div class="relative flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
     <NavBar :navItems="secretaryNavItems" />
 
-    <main class="flex-1 p-8">
+    <main class="p-4 sm:p-8 sm:pl-64 pt-20 sm:pt-8">
       <div class="flex items-center mb-8">
         <p class="text-xl text-sky-900 font-poppins">
           Welcome back

@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { Menu, X, UserCircle, Users, Calendar as CalendarIcon, LogOut } from 'lucide-vue-next'
 import Calendar from '../Calendar.vue'
+import NavBar from '@/components/NavBar.vue'
 import Cookies from 'js-cookie'
 
 interface Appointment {
@@ -23,7 +24,7 @@ interface CalendarEvent {
 
 const userName = ref<string | null>(null)
 const isMenuOpen = ref(false)
-const appointments = ref<CalendarEvent[]>([]) // Changé pour correspondre au type attendu par Calendar
+const appointments = ref<CalendarEvent[]>([])
 
 const fetchUserName = async () => {
   try {
@@ -62,7 +63,7 @@ const handleNewAppointment = () => {
   console.log('New appointment clicked')
 }
 
-const handleEventClick = (event: CalendarEvent) => { // Changé pour correspondre au type émis par Calendar
+const handleEventClick = (event: CalendarEvent) => {
   console.log('Event clicked:', event)
 }
 

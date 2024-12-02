@@ -34,7 +34,7 @@ const logout = () => {
 
 <template>
   <!-- Desktop Navigation -->
-  <nav class="hidden sm:flex w-64 bg-white/30 backdrop-blur-md border-r border-white/40 p-6 flex-col">
+  <nav class="hidden sm:flex fixed left-0 top-0 bottom-0 w-64 bg-white/30 backdrop-blur-md border-r border-white/40 p-6 flex-col">
     <div class="flex items-center gap-4 mb-8">
       <img
         src="@/assets/logo/NurseCare-Logo.png"
@@ -45,7 +45,6 @@ const logout = () => {
         Nurse Care
       </h1>
     </div>
-
     <div class="flex flex-col space-y-2">
       <router-link
         v-for="item in navItems"
@@ -57,7 +56,6 @@ const logout = () => {
         {{ item.name }}
       </router-link>
     </div>
-
     <div class="mt-auto pt-6">
       <button
         @click="logout"
@@ -71,21 +69,25 @@ const logout = () => {
 
   <!-- Mobile Navigation -->
   <div class="sm:hidden">
-    <!-- Mobile Header -->
-    <header class="bg-white/30 backdrop-blur-md p-4 flex justify-between items-center">
-      <button
-        @click="isMenuOpen = !isMenuOpen"
-        class="p-2 rounded-lg hover:bg-sky-200/70 transition-colors"
-      >
-        <Menu class="h-6 w-6 text-sky-900" />
-      </button>
-      <div class="flex items-center gap-2">
-        <img src="@/assets/logo/NurseCare-Logo.png" alt="NurseCare" class="h-8 w-auto" />
-        <span class="text-lg font-medium text-sky-900">NurseCare</span>
+    <!-- Header mobile -->
+    <header class="fixed top-0 left-0 right-0 bg-white/30 backdrop-blur-md z-40">
+      <div class="p-4 flex justify-between items-center">
+        <button
+          @click="isMenuOpen = !isMenuOpen"
+          class="p-2 rounded-lg hover:bg-sky-200/70 transition-colors"
+        >
+          <Menu class="h-6 w-6 text-sky-900" />
+        </button>
+        <div class="flex items-center gap-2">
+          <img src="@/assets/logo/NurseCare-Logo.png" alt="NurseCare" class="h-8 w-auto" />
+        </div>
       </div>
     </header>
 
-    <!-- Mobile Menu -->
+    <!-- Espaceur -->
+    <div class="h-16"></div>
+
+    <!-- Menu overlay -->
     <div
       v-if="isMenuOpen"
       class="fixed inset-0 z-50"
@@ -102,7 +104,6 @@ const logout = () => {
             <X class="h-6 w-6 text-sky-900" />
           </button>
         </div>
-
         <nav class="space-y-2">
           <router-link
             v-for="item in navItems"
@@ -114,7 +115,6 @@ const logout = () => {
             <component :is="getIcon(item.icon)" class="h-5 w-5" />
             {{ item.name }}
           </router-link>
-
           <button
             @click="logout"
             class="w-full mt-8 p-3 text-rose-600 rounded-lg hover:bg-rose-100/50 transition-colors flex items-center gap-2"
