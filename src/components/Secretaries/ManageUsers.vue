@@ -219,7 +219,7 @@ onMounted(fetchUsers)
   <div class="relative flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
     <NavBar :navItems="secretaryNavItems" />
 
-    <main class="p-4 sm:p-8 sm:pl-64 pt-20 sm:pt-8">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-8 pb-12">
       <ToastNotification
         v-if="showToast"
         :message="toastMessage"
@@ -227,45 +227,47 @@ onMounted(fetchUsers)
         @close="showToast = false"
       />
 
-      <div class="bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
-        <div class="flex items-center gap-4 mb-8">
-          <h1 class="text-3xl md:text-4xl font-medium text-sky-900">User Management</h1>
-        </div>
+      <div class="max-w-7xl mx-auto">
+        <div class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+          <div class="flex items-center gap-4 mb-8">
+            <h1 class="text-3xl md:text-4xl font-medium text-sky-900">User Management</h1>
+          </div>
 
-        <div class="mb-12 flex flex-col items-center">
-          <button
-            @click="toggleForm"
-            class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
-          >
-            <span>Create New User</span>
-          </button>
-        </div>
+          <div class="mb-12 flex flex-col items-center">
+            <button
+              @click="toggleForm"
+              class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
+            >
+              <span>Create New User</span>
+            </button>
+          </div>
 
-        <div class="mb-8">
-          <h2 class="text-2xl md:text-3xl font-medium text-sky-900 mb-4">User List</h2>
-          <DataTable
-            :headers="[
-              { actual: 'idUser', display: 'ID' },
-              { actual: 'userName', display: 'Name' },
-              { actual: 'userMail', display: 'Email' },
-              { actual: 'userRole', display: 'Role' },
-            ]"
-            :items="users"
-            rowKey="idUser"
-            :valueMappings="[
-              {
-                field: 'userRole',
-                values: {
-                  '1': 'Manager',
-                  '2': 'Secretary',
-                  '3': 'Nurse',
+          <div class="mb-8">
+            <h2 class="text-2xl md:text-3xl font-medium text-sky-900 mb-4">User List</h2>
+            <DataTable
+              :headers="[
+                { actual: 'idUser', display: 'ID' },
+                { actual: 'userName', display: 'Name' },
+                { actual: 'userMail', display: 'Email' },
+                { actual: 'userRole', display: 'Role' },
+              ]"
+              :items="users"
+              rowKey="idUser"
+              :valueMappings="[
+                {
+                  field: 'userRole',
+                  values: {
+                    '1': 'Manager',
+                    '2': 'Secretary',
+                    '3': 'Nurse',
+                  },
                 },
-              },
-            ]"
-            @delete="handleDelete"
-            @update="handleUpdate"
-            @cancel="handleCancel"
-          />
+              ]"
+              @delete="handleDelete"
+              @update="handleUpdate"
+              @cancel="handleCancel"
+            />
+          </div>
         </div>
       </div>
 
@@ -299,9 +301,9 @@ onMounted(fetchUsers)
           class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
           @click.stop
         >
-          <div class="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
+          <div class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
             <div class="flex justify-between items-center mb-6">
-              <h2 class="text-2xl md:text-3xl font-medium text-sky-900">Create New User</h2>
+              <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">Create New User</h2>
               <button
                 @click="showForm = false"
                 class="text-sky-900/60 hover:text-sky-900 transition-colors"
@@ -359,20 +361,21 @@ onMounted(fetchUsers)
 </template>
 
 <style scoped>
-.overflow-y-auto {
+.overflow-x-auto {
   scrollbar-width: thin;
   scrollbar-color: rgba(186, 230, 253, 0.4) transparent;
 }
 
-.overflow-y-auto::-webkit-scrollbar {
+.overflow-x-auto::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-track {
+.overflow-x-auto::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb {
+.overflow-x-auto::-webkit-scrollbar-thumb {
   background-color: rgba(186, 230, 253, 0.4);
   border-radius: 20px;
   border: transparent;

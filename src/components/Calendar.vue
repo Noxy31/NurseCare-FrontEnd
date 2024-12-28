@@ -119,15 +119,13 @@ const formatDate = (date: Date, formatString: string) => {
 </script>
 
 <template>
-  <div
-    class="bg-sky-900/20 backdrop-blur-md p-4 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-sky-700/20"
-  >
+  <div class="bg-white rounded-xl shadow-lg border border-sky-100">
     <!-- Header avec mois et boutons -->
-    <div class="flex items-center justify-between mb-4 sm:mb-6">
+    <div class="flex items-center justify-between p-4 sm:p-6 border-b border-sky-100">
       <div class="flex items-center gap-2">
         <button
           @click="previousMonth"
-          class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+          class="bg-sky-100 hover:bg-sky-200 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200"
         >
           &lt;
         </button>
@@ -136,7 +134,7 @@ const formatDate = (date: Date, formatString: string) => {
         </h2>
         <button
           @click="nextMonth"
-          class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+          class="bg-sky-100 hover:bg-sky-200 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200"
         >
           &gt;
         </button>
@@ -145,7 +143,7 @@ const formatDate = (date: Date, formatString: string) => {
       <button
         v-if="!readOnly"
         @click="$emit('new-event-click')"
-        class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md text-sm sm:text-base"
+        class="bg-sky-100 hover:bg-sky-200 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200 text-sm sm:text-base"
       >
         <span class="hidden sm:inline">New Appointment</span>
         <span class="sm:hidden">New</span>
@@ -153,12 +151,12 @@ const formatDate = (date: Date, formatString: string) => {
     </div>
 
     <!-- Grille du calendrier -->
-    <div class="grid grid-cols-7 gap-px bg-sky-700/20 rounded-lg overflow-hidden">
+    <div class="grid grid-cols-7 gap-px bg-sky-50">
       <!-- Jours de la semaine -->
       <div
         v-for="day in weekDays"
         :key="day"
-        class="bg-sky-900/30 p-1 sm:p-3 text-center text-xs sm:text-sm font-semibold text-sky-900"
+        class="bg-sky-50 p-1 sm:p-3 text-center text-xs sm:text-sm font-semibold text-sky-900"
       >
         <span class="sm:hidden">{{ day.charAt(0) }}</span>
         <span class="hidden sm:inline">{{ day }}</span>
@@ -169,15 +167,15 @@ const formatDate = (date: Date, formatString: string) => {
         v-for="date in calendarDays"
         :key="date.date.toISOString()"
         :class="[
-          'min-h-[45px] sm:min-h-[120px] p-1 sm:p-2 relative cursor-pointer',
-          'transition-all duration-200 ease-in-out transform',
-          date.isCurrentMonth ? 'bg-sky-900/5 hover:bg-sky-800/10' : 'bg-sky-900/20',
+          'min-h-[45px] sm:min-h-[120px] p-1 sm:p-2 relative cursor-pointer bg-white',
+          'transition-colors duration-200 ease-in-out',
+          date.isCurrentMonth ? 'hover:bg-sky-50' : 'bg-gray-50',
         ]"
       >
         <span
           :class="[
-            'absolute top-1 right-1 sm:right-2 text-xs sm:text-sm',
-            date.isCurrentMonth ? 'text-sky-900' : 'text-sky-900/40',
+            'absolute top-1 right-1 sm:right-2 text-xs sm:text-sm font-medium',
+            date.isCurrentMonth ? 'text-sky-900' : 'text-sky-400',
           ]"
         >
           {{ date.dayNumber }}
@@ -190,7 +188,7 @@ const formatDate = (date: Date, formatString: string) => {
         >
           <button
             @click.stop="openEventsModal(date.date)"
-            class="bg-sky-700/40 hover:bg-sky-700/60 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105"
+            class="bg-sky-100 hover:bg-sky-200 text-sky-900 font-medium py-1 sm:py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm transition-colors duration-200"
           >
             <span class="hidden sm:inline">See Events</span>
             <span class="sm:hidden">View</span>
@@ -200,17 +198,15 @@ const formatDate = (date: Date, formatString: string) => {
     </div>
 
     <!-- Modal -->
-    <div v-if="showAppointmentsModal" class="fixed inset-0" @click="showAppointmentsModal = false">
-      <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+    <div v-if="showAppointmentsModal" class="fixed inset-0 z-50" @click="showAppointmentsModal = false">
+      <div class="absolute inset-0 bg-black/30" />
       <div
-        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl z-50"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl"
         @click.stop
       >
-        <div
-          class="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4"
-        >
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-xl mx-4">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-medium text-sky-900">
+            <h2 class="text-xl sm:text-2xl font-medium text-sky-900">
               {{ props.modalTitle }} - {{ formatDate(selectedDate, 'MMMM d, yyyy') }}
             </h2>
             <button
@@ -241,9 +237,7 @@ const formatDate = (date: Date, formatString: string) => {
               :key="event.id"
               :event="event"
             >
-              <div
-                class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              >
+              <div class="bg-white p-4 rounded-xl shadow border border-sky-100">
                 <div class="text-sky-900">
                   <div class="font-medium">{{ event.time }}</div>
                   <div>{{ event.title }}</div>
