@@ -201,10 +201,10 @@ onMounted(fetchClients)
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <NavBar :navItems="secretaryNavItems" />
+  <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
+    <NavBar :navItems="secretaryNavItems" class="fixed z-50" />
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-8 pb-12">
+    <main class="flex-1 w-full min-w-0 p-4 sm:ml-64 sm:p-6">
       <ToastNotification
         v-if="showToast"
         :message="toastMessage"
@@ -212,40 +212,38 @@ onMounted(fetchClients)
         @close="showToast = false"
       />
 
-      <div class="max-w-7xl mx-auto">
-        <div class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
-          <div class="flex items-center gap-4 mb-6 sm:mb-8">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">Patient Management</h1>
-          </div>
+      <div class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+        <div class="flex items-center gap-4 mb-6 sm:mb-8">
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">Patient Management</h1>
+        </div>
 
-          <div class="mb-12 flex flex-col items-center">
-            <button
-              @click="toggleForm"
-              class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
-            >
-              <span>Create New Patient</span>
-            </button>
-          </div>
+        <div class="mb-12 flex flex-col items-center">
+          <button
+            @click="toggleForm"
+            class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
+          >
+            <span>Create New Patient</span>
+          </button>
+        </div>
 
-          <div>
-            <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Patient List</h2>
-            <div class="overflow-x-auto">
-              <DataTable
-                :headers="[
-                  { actual: 'idClient', display: 'ID' },
-                  { actual: 'clientName', display: 'Name' },
-                  { actual: 'clientPhone', display: 'Phone' },
-                  { actual: 'clientMail', display: 'Email' },
-                  { actual: 'clientAddress', display: 'Address' },
-                ]"
-                :items="clients"
-                rowKey="idClient"
-                @delete="handleDelete"
-                @update="handleUpdate"
-                @cancel="handleCancel"
-                class="w-full"
-              />
-            </div>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Patient List</h2>
+          <div class="overflow-x-auto min-w-0">
+            <DataTable
+              :headers="[
+                { actual: 'idClient', display: 'ID' },
+                { actual: 'clientName', display: 'Name' },
+                { actual: 'clientPhone', display: 'Phone' },
+                { actual: 'clientMail', display: 'Email' },
+                { actual: 'clientAddress', display: 'Address' },
+              ]"
+              :items="clients"
+              rowKey="idClient"
+              @delete="handleDelete"
+              @update="handleUpdate"
+              @cancel="handleCancel"
+              class="w-full"
+            />
           </div>
         </div>
       </div>
