@@ -201,10 +201,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <NavBar :navItems="secretaryNavItems" />
+  <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
+    <NavBar :navItems="secretaryNavItems" class="fixed z-50" />
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-8 pb-12">
+    <!-- Contenu principal avec marge à gauche uniquement sur desktop -->
+    <main class="flex-1 p-4 sm:ml-64 sm:p-6">
       <ToastNotification
         v-if="showToast"
         :message="toastMessage"
@@ -212,54 +213,53 @@ onMounted(() => {
         @close="showToast = false"
       />
 
-      <div class="max-w-7xl mx-auto">
-        <div class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
-          <div class="flex items-center gap-4 mb-6 sm:mb-8">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">Planning Management</h1>
-          </div>
+      <div class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+        <div class="flex items-center gap-4 mb-6 sm:mb-8">
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">Planning Management</h1>
+        </div>
 
-          <Calendar
-            :events="events"
-            modalTitle="Appointments"
-            class="min-h-[600px] w-full"
-            @new-event-click="handleNewEventClick"
-            @event-click="handleEventClick"
-            @date-click="handleDateClick"
-          >
-            <template #event-card="{ event }">
-              <div class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-sky-200/40">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <h3 class="font-medium text-sky-900">Patient</h3>
-                    <p class="text-sky-800">{{ event.clientName }}</p>
-                  </div>
-                  <div>
-                    <h3 class="font-medium text-sky-900">Nurse</h3>
-                    <p class="text-sky-800">{{ event.nurseName }}</p>
-                  </div>
-                  <div>
-                    <h3 class="font-medium text-sky-900">Planned Time</h3>
-                    <p class="text-sky-800">{{ event.plannedAppTime }}</p>
-                  </div>
-                  <div>
-                    <h3 class="font-medium text-sky-900">Real Time</h3>
-                    <p class="text-sky-800">{{ event.realAppTime || 'Not completed' }}</p>
-                  </div>
-                  <div class="sm:col-span-2">
-                    <span
-                      :class="[
-                        'inline-block px-3 py-1 rounded-full text-sm font-medium',
-                        event.isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
-                      ]"
-                    >
-                      {{ event.isDone ? 'Completed' : 'Pending' }}
-                    </span>
-                  </div>
+        <Calendar
+          :events="events"
+          modalTitle="Appointments"
+          class="min-h-[600px] w-full"
+          @new-event-click="handleNewEventClick"
+          @event-click="handleEventClick"
+          @date-click="handleDateClick"
+        >
+          <!-- Le reste du contenu reste identique -->
+          <template #event-card="{ event }">
+            <div class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-sky-200/40">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <h3 class="font-medium text-sky-900">Patient</h3>
+                  <p class="text-sky-800">{{ event.clientName }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Nurse</h3>
+                  <p class="text-sky-800">{{ event.nurseName }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Planned Time</h3>
+                  <p class="text-sky-800">{{ event.plannedAppTime }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Real Time</h3>
+                  <p class="text-sky-800">{{ event.realAppTime || 'Not completed' }}</p>
+                </div>
+                <div class="sm:col-span-2">
+                  <span
+                    :class="[
+                      'inline-block px-3 py-1 rounded-full text-sm font-medium',
+                      event.isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
+                    ]"
+                  >
+                    {{ event.isDone ? 'Completed' : 'Pending' }}
+                  </span>
                 </div>
               </div>
-            </template>
-          </Calendar>
-        </div>
+            </div>
+          </template>
+        </Calendar>
       </div>
 
       <!-- Modal de création de rendez-vous -->
