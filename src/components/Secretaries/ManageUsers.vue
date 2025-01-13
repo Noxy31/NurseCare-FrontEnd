@@ -78,9 +78,9 @@ const formFields: FormField[] = [
     type: 'select',
     placeholder: 'Select a role',
     options: [
-      { label: 'Manager', value: 1 },
-      { label: 'Secretary', value: 2 },
-      { label: 'Nurse', value: 3 },
+      { label: 'Manager', value: 'manager' },
+      { label: 'Secretary', value: 'secretary' },
+      { label: 'Nurse', value: 'nurse' },
     ],
   },
 ]
@@ -257,9 +257,9 @@ onMounted(fetchUsers)
                 {
                   field: 'userRole',
                   values: {
-                    '1': 'Manager',
-                    '2': 'Secretary',
-                    '3': 'Nurse',
+                    'manager': 'Manager',
+                    'secretary': 'Secretary',
+                    'nurse': 'Nurse',
                   },
                 },
               ]"
