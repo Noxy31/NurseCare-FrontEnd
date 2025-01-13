@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import Cookies from 'js-cookie'
 import Login from '@/components/Login.vue'
@@ -38,25 +38,25 @@ const routes: Array<RouteRecordRaw> = [
     path: '/SHome',
     name: 'SecretaryHome',
     component: SecretaryHome,
-    meta: { requiresAuth: true, requiresSecretary: true }
+    meta: { requiresAuth: true, requiresSecretary: true },
   },
   {
     path: '/SPlanning',
     name: 'SecretaryPlanning',
     component: SecretaryPlanning,
-    meta: { requiresAuth: true, requiresSecretary: true  }
+    meta: { requiresAuth: true, requiresSecretary: true },
   },
   {
     path: '/users',
     name: 'ManageUsers',
     component: ManageUsers,
-    meta: { requiresAuth: true, requiresSecretary: true }
+    meta: { requiresAuth: true, requiresSecretary: true },
   },
   {
     path: '/patients',
     name: 'ManagePatients',
     component: ManagePatients,
-    meta: { requiresAuth: true, requiresSecretary: true }
+    meta: { requiresAuth: true, requiresSecretary: true },
   },
 
   // routes pour infirmiers //
@@ -64,9 +64,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/NHome',
     name: 'NurseHome',
     component: NurseHome,
-    meta: { requiresAuth: true, requiresNurse: true }
+    meta: { requiresAuth: true, requiresNurse: true },
   },
-
 ]
 
 const router = createRouter({
@@ -77,31 +76,26 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = Cookies.get('token')
   const isAuthenticated = token !== undefined
-  let userRole: number | null = null
+  let userRole: string | null = null
 
   if (token) {
     const payload = JSON.parse(atob(token.split('.')[1]))
-    // Changement ici : on utilise 'role' au lieu de 'userRole' et on parse en entier
-    userRole = parseInt(payload.role)
+    userRole = payload.role
   }
 
-  if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
-    next({ name: 'login' })
-    return
+  if (to.matched.some((record) => record.meta.requiresAuth) && !isAuthenticated) {
+    return next({ name: 'login' })
   }
 
   if (userRole !== null) {
-    if (to.matched.some(record => record.meta.requiresManager) && userRole !== 1) {
-      next({ name: 'AccessDenied' })
-      return
+    if (to.matched.some((record) => record.meta.requiresManager) && userRole !== 'manager') {
+      return next({ name: 'AccessDenied' })
     }
-    if (to.matched.some(record => record.meta.requiresSecretary) && userRole !== 2) {
-      next({ name: 'AccessDenied' })
-      return
+    if (to.matched.some((record) => record.meta.requiresSecretary) && userRole !== 'secretary') {
+      return next({ name: 'AccessDenied' })
     }
-    if (to.matched.some(record => record.meta.requiresNurse) && userRole !== 3) {
-      next({ name: 'AccessDenied' })
-      return
+    if (to.matched.some((record) => record.meta.requiresNurse) && userRole !== 'nurse') {
+      return next({ name: 'AccessDenied' })
     }
   }
 

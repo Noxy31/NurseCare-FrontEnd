@@ -63,17 +63,17 @@ const handleLogin = async (formData: Record<string, string>) => {
     console.log('Login successful:', data)
     showNotification('Login successful! Redirecting...', 'success')
 
-    const userRole = parseInt(data.user.role)
+    const userRole = data.user.role
 
     let redirectPath
     switch (userRole) {
-      case 1:
+      case 'manager':
         redirectPath = '/MHome'
         break
-      case 2:
+      case "secretary":
         redirectPath = '/SHome'
         break
-      case 3:
+      case "nurse":
         redirectPath = '/NHome'
         break
       default:
