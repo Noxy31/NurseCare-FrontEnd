@@ -28,7 +28,7 @@ interface AppointmentFormData {
 const secretaryNavItems = [
   { name: 'Home', path: '/SHome', icon: 'Home' },
   { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
-  { name: 'Bills', path: '/bills', icon: 'Receipt' },
+  { name: 'Bills', path: '/SBills', icon: 'Receipt' },
   { name: 'Patients', path: '/patients', icon: 'Users' },
   { name: 'Users', path: '/users', icon: 'UserCog' },
 ]

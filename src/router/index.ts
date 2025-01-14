@@ -4,12 +4,14 @@ import Cookies from 'js-cookie'
 import Login from '@/components/Login.vue'
 import AccessDenied from '@/components/AccessDenied.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
+
 // composants pour secretaires
 import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
 import ManageUsers from '@/components/Secretaries/ManageUsers.vue'
 import SecretaryPlanning from '@/components/Secretaries/SecretaryPlanning.vue'
 import ManagePatients from '@/components/Secretaries/ManagePatients.vue'
 import SecretaryBill from '@/components/Secretaries/SecretaryBill.vue'
+
 // composants pour infirmiers
 import NurseHome from '@/components/Nurses/NurseHome.vue'
 
@@ -34,6 +36,7 @@ const routes: Array<RouteRecordRaw> = [
       errorMessage: 'The page you are looking for does not exist.',
     },
   },
+
   // Routes pour Secretaires //
   {
     path: '/SHome',
