@@ -9,6 +9,7 @@ import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
 import ManageUsers from '@/components/Secretaries/ManageUsers.vue'
 import SecretaryPlanning from '@/components/Secretaries/SecretaryPlanning.vue'
 import ManagePatients from '@/components/Secretaries/ManagePatients.vue'
+import SecretaryBill from '@/components/Secretaries/SecretaryBill.vue'
 // composants pour infirmiers
 import NurseHome from '@/components/Nurses/NurseHome.vue'
 
@@ -56,6 +57,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/patients',
     name: 'ManagePatients',
     component: ManagePatients,
+    meta: { requiresAuth: true, requiresSecretary: true },
+  },
+  {
+    path: '/SBills',
+    name: 'SecretaryBill',
+    component: SecretaryBill,
     meta: { requiresAuth: true, requiresSecretary: true },
   },
 

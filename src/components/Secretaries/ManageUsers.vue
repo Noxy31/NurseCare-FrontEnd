@@ -34,13 +34,10 @@ const secretaryNavItems = [
 const showForm = ref(false)
 const isLoading = ref(false)
 const router = useRouter()
-
-// Etat des notifications
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
 
-// variable qui contient les donnés a afficher de la notification
 const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
   toastType.value = type

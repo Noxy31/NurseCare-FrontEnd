@@ -18,7 +18,7 @@ interface CalendarEvent {
 
 interface AppointmentFormData {
   appDate: Date
-  plannedAppTime: string
+  foresAppTime: string
   realAppTime: null
   isDone: number
   idClient: number
@@ -43,7 +43,6 @@ const selectedDate = ref<Date>(new Date())
 const patientSuggestions = ref<{ label: string; value: number }[]>([]);
 const nurseSuggestions = ref<{ label: string; value: number }[]>([]);
 
-// Initialisation des champs pour le formulaire
 const formFields = computed((): FormField[] => [
   {
     name: 'appDate',
@@ -54,7 +53,7 @@ const formFields = computed((): FormField[] => [
       : format(new Date(), 'yyyy-MM-dd'),
   },
   {
-    name: 'plannedAppTime',
+    name: 'foresAppTime',
     label: 'Time',
     type: 'time',
     default: '',
@@ -73,14 +72,12 @@ const formFields = computed((): FormField[] => [
   },
 ]);
 
-// Initialisation des toasts de notif
 const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
   toastType.value = type
   showToast.value = true
 }
 
-//Récupération des evenements du calendrier (planning)
 const fetchEvents = async () => {
   try {
     const response = await fetch('/api/appointment/get-appointments-details')
@@ -89,11 +86,11 @@ const fetchEvents = async () => {
     events.value = data.map((event: any) => ({
       id: event.idApp,
       date: new Date(event.appDate),
-      time: event.plannedAppTime,
+      time: event.foresAppTime,
       title: `${event.clientName || 'Unnamed Patient'} - ${event.nurseName || 'Unassigned'}`,
       clientName: event.clientName,
       nurseName: event.nurseName,
-      plannedAppTime: event.plannedAppTime,
+      foresAppTime: event.foresAppTime,
       realAppTime: event.realAppTime,
       isDone: event.isDone
     }))
@@ -106,7 +103,6 @@ const fetchEvents = async () => {
 
 const fetchSuggestions = async () => {
   try {
-    // Récupération des patients
     console.log('Fetching patients...');
     const patientResponse = await fetch('/api/client/get-client-names');
     if (!patientResponse.ok) {
@@ -122,7 +118,6 @@ const fetchSuggestions = async () => {
 
     console.log('Formatted patient suggestions:', patientSuggestions.value);
 
-    // Récupération des infirmières
     console.log('Fetching nurses...');
     const nurseResponse = await fetch('/api/users/get-nurses');
     if (!nurseResponse.ok) {
@@ -148,7 +143,7 @@ const handleFormSubmit = async (formData: Record<string, any>) => {
   try {
     const eventData: AppointmentFormData = {
       appDate: formData.appDate,
-      plannedAppTime: formData.plannedAppTime,
+      foresAppTime: formData.foresAppTime,
       realAppTime: null,
       isDone: 0,
       idClient: formData.idClient,
@@ -204,7 +199,6 @@ onMounted(() => {
   <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
     <NavBar :navItems="secretaryNavItems" class="fixed z-50" />
 
-    <!-- Contenu principal avec marge à gauche uniquement sur desktop -->
     <main class="flex-1 p-4 sm:ml-64 sm:p-6">
       <ToastNotification
         v-if="showToast"
@@ -232,19 +226,19 @@ onMounted(() => {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <h3 class="font-medium text-sky-900">Patient</h3>
-                  <p class="text-sky-800">{{ event.clientName }}</p>
+                  <p class="text-sky-500">{{ event.clientName }}</p>
                 </div>
                 <div>
                   <h3 class="font-medium text-sky-900">Nurse</h3>
-                  <p class="text-sky-800">{{ event.nurseName }}</p>
+                  <p class="text-sky-500">{{ event.nurseName }}</p>
                 </div>
                 <div>
                   <h3 class="font-medium text-sky-900">Planned Time</h3>
-                  <p class="text-sky-800">{{ event.plannedAppTime }}</p>
+                  <p class="text-sky-500">{{ event.foresAppTime }}</p>
                 </div>
                 <div>
                   <h3 class="font-medium text-sky-900">Real Time</h3>
-                  <p class="text-sky-800">{{ event.realAppTime || 'Not completed' }}</p>
+                  <p class="text-sky-500">{{ event.realAppTime || '-' }}</p>
                 </div>
                 <div class="sm:col-span-2">
                   <span
@@ -262,9 +256,7 @@ onMounted(() => {
         </Calendar>
       </div>
 
-      <!-- Modal de création de rendez-vous -->
       <Teleport to="body">
-        <!-- Overlay -->
         <transition
           enter-active-class="transition-all duration-300 ease-out"
           enter-from-class="opacity-0"
