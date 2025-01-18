@@ -28,9 +28,9 @@ const currentTomorrowIndex = ref(0)
 
 const nurseNavItems = [
   { name: 'Home', path: '/NHome', icon: 'Home' },
-  { name: 'Agenda', path: '/agenda', icon: 'Calendar' },
-  { name: 'Bills', path: '/bills', icon: 'FileText' },
-  { name: 'Profile', path: '/profile', icon: 'UserCircle' },
+  { name: 'Agenda', path: '/NAgenda', icon: 'Calendar' },
+  { name: 'Bills', path: '/NBills', icon: 'FileText' },
+  { name: 'Profile', path: '/NProfile', icon: 'UserCircle' },
 ]
 
 const fetchUserName = async () => {
@@ -124,10 +124,10 @@ onMounted(() => {
     <NavBar :navItems="nurseNavItems" />
     <main class="p-4 sm:p-8 sm:pl-72 pt-20 sm:pt-8 w-full">
       <!-- Welcome message -->
-      <div class="mb-8 pl-4">
-        <p class="text-md text-indigo-900/70">
+      <div class="mb-8">
+        <p class="text-xl text-indigo-900">
           Welcome back
-          <span class="font-medium">{{ userName || 'Loading...' }} !</span>
+          <span class="font-medium">{{ userName || 'Loading...' }}</span>
         </p>
       </div>
 

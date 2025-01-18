@@ -40,8 +40,8 @@ const showForm = ref(false)
 const events = ref<CalendarEvent[]>([])
 const selectedDate = ref<Date>(new Date())
 
-const patientSuggestions = ref<{ label: string; value: number }[]>([]);
-const nurseSuggestions = ref<{ label: string; value: number }[]>([]);
+const patientSuggestions = ref<{ label: string; value: number }[]>([])
+const nurseSuggestions = ref<{ label: string; value: number }[]>([])
 
 const formFields = computed((): FormField[] => [
   {
@@ -70,7 +70,7 @@ const formFields = computed((): FormField[] => [
     type: 'text',
     suggestions: nurseSuggestions.value,
   },
-]);
+])
 
 const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
@@ -90,9 +90,11 @@ const fetchEvents = async () => {
       title: `${event.clientName || 'Unnamed Patient'} - ${event.nurseName || 'Unassigned'}`,
       clientName: event.clientName,
       nurseName: event.nurseName,
+      clientMail: event.clientMail,
+      clientPhone: event.clientPhone,
       foresAppTime: event.foresAppTime,
       realAppTime: event.realAppTime,
-      isDone: event.isDone
+      isDone: event.isDone,
     }))
   } catch (error) {
     console.error('Error fetching appointments:', error)
@@ -100,44 +102,42 @@ const fetchEvents = async () => {
   }
 }
 
-
 const fetchSuggestions = async () => {
   try {
-    console.log('Fetching patients...');
-    const patientResponse = await fetch('/api/client/get-client-names');
+    console.log('Fetching patients...')
+    const patientResponse = await fetch('/api/client/get-client-names')
     if (!patientResponse.ok) {
-      throw new Error('Failed to fetch patients');
+      throw new Error('Failed to fetch patients')
     }
-    const patients = await patientResponse.json();
-    console.log('Raw patients data:', patients);
+    const patients = await patientResponse.json()
+    console.log('Raw patients data:', patients)
 
     patientSuggestions.value = patients.map((patient: any) => ({
       label: patient.clientName,
       value: patient.idClient,
-    }));
+    }))
 
-    console.log('Formatted patient suggestions:', patientSuggestions.value);
+    console.log('Formatted patient suggestions:', patientSuggestions.value)
 
-    console.log('Fetching nurses...');
-    const nurseResponse = await fetch('/api/users/get-nurses');
+    console.log('Fetching nurses...')
+    const nurseResponse = await fetch('/api/users/get-nurses')
     if (!nurseResponse.ok) {
-      throw new Error('Failed to fetch nurses');
+      throw new Error('Failed to fetch nurses')
     }
-    const nurses = await nurseResponse.json();
-    console.log('Raw nurses data:', nurses);
+    const nurses = await nurseResponse.json()
+    console.log('Raw nurses data:', nurses)
 
     nurseSuggestions.value = nurses.map((nurse: any) => ({
       label: nurse.userName,
       value: nurse.idUser,
-    }));
+    }))
 
-    console.log('Formatted nurse suggestions:', nurseSuggestions.value);
-
+    console.log('Formatted nurse suggestions:', nurseSuggestions.value)
   } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    showNotification('Failed to load suggestions', 'error');
+    console.error('Error fetching suggestions:', error)
+    showNotification('Failed to load suggestions', 'error')
   }
-};
+}
 
 const handleFormSubmit = async (formData: Record<string, any>) => {
   try {
@@ -190,9 +190,9 @@ const handleNewEventClick = () => {
 }
 
 onMounted(() => {
-  fetchEvents();
-  fetchSuggestions();
-});
+  fetchEvents()
+  fetchSuggestions()
+})
 </script>
 
 <template>
@@ -207,9 +207,13 @@ onMounted(() => {
         @close="showToast = false"
       />
 
-      <div class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+      <div
+        class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
+      >
         <div class="flex items-center gap-4 mb-6 sm:mb-8">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">Planning Management</h1>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">
+            Planning Management
+          </h1>
         </div>
 
         <Calendar
@@ -222,7 +226,9 @@ onMounted(() => {
         >
           <!-- Le reste du contenu reste identique -->
           <template #event-card="{ event }">
-            <div class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-sky-200/40">
+            <div
+              class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-sky-200/40"
+            >
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <h3 class="font-medium text-sky-900">Patient</h3>
@@ -240,11 +246,19 @@ onMounted(() => {
                   <h3 class="font-medium text-sky-900">Real Time</h3>
                   <p class="text-sky-500">{{ event.realAppTime || '-' }}</p>
                 </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Phone</h3>
+                  <p class="text-sky-500">{{ event.clientPhone || '-' }}</p>
+                </div>
+                <div>
+                  <h3 class="font-medium text-sky-900">Email</h3>
+                  <p class="text-sky-500">{{ event.clientMail || '-' }}</p>
+                </div>
                 <div class="sm:col-span-2">
                   <span
                     :class="[
                       'inline-block px-3 py-1 rounded-full text-sm font-medium',
-                      event.isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
+                      event.isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800',
                     ]"
                   >
                     {{ event.isDone ? 'Completed' : 'Pending' }}
@@ -286,9 +300,13 @@ onMounted(() => {
             class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
             @click.stop
           >
-            <div class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
+            <div
+              class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4"
+            >
               <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">New Appointment</h2>
+                <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">
+                  New Appointment
+                </h2>
                 <button
                   @click="showForm = false"
                   class="text-sky-900/60 hover:text-sky-900 transition-colors"
@@ -315,7 +333,9 @@ onMounted(() => {
                 :fields="formFields"
                 submit-label="Create Appointment"
                 @submit="handleFormSubmit"
-                @validation-error="() => showNotification('Please fill all required fields', 'error')"
+                @validation-error="
+                  () => showNotification('Please fill all required fields', 'error')
+                "
               >
                 <template #buttons="{ isSubmitting }">
                   <div class="flex justify-end gap-4 mt-6">
