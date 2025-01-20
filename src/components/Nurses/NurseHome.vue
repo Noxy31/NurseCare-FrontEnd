@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { ChevronLeftIcon, ChevronRightIcon, MapPin, Phone } from 'lucide-vue-next'
 import NavBar from '@/components/NavBar.vue'
+import AppointmentModal from '../AppointmentModal.vue'
 import Cookies from 'js-cookie'
 import { useRouter } from 'vue-router'
 
@@ -25,6 +26,8 @@ const appointments = ref<Appointment[]>([])
 const currentAppointmentIndex = ref(0)
 const tomorrowAppointments = ref<Appointment[]>([])
 const currentTomorrowIndex = ref(0)
+const showModal = ref(false)
+const selectedAppointment = ref(null)
 
 const nurseNavItems = [
   { name: 'Home', path: '/NHome', icon: 'Home' },
@@ -112,6 +115,22 @@ const previousTomorrowAppointment = () => {
   }
 }
 
+const openAppointmentModal = (appointment: any) => {
+  selectedAppointment.value = appointment
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+  selectedAppointment.value = null
+}
+
+const handleAppointmentUpdate = () => {
+  // Refresh the appointments lists
+  fetchTodayAppointments()
+  fetchTomorrowAppointments()
+}
+
 onMounted(() => {
   fetchUserName()
   fetchTodayAppointments()
@@ -120,7 +139,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
+  <div
+    class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50"
+  >
     <NavBar :navItems="nurseNavItems" />
     <main class="p-4 sm:p-8 sm:pl-72 pt-20 sm:pt-8 w-full">
       <!-- Welcome message -->
@@ -131,18 +152,31 @@ onMounted(() => {
         </p>
       </div>
 
-      <!-- Today's Appointments -->
+<!------------------------------------- Today's Appointments ------------------------------------------------->
       <div class="mt-6 pl-4">
         <h2 class="text-2xl font-semibold text-indigo-900 mb-6">Today's Appointments</h2>
-        <div v-if="appointments.length > 0" class="relative mx-14 sm:mx-auto max-w-lg sm:max-w-2xl mt-12">
-          <div class="bg-white/30 backdrop-blur-md p-4 sm:p-8 rounded-xl shadow-lg border border-white/40">
+        <div
+          v-if="appointments.length > 0"
+          class="relative mx-14 sm:mx-auto max-w-lg sm:max-w-2xl mt-12"
+          @click="openAppointmentModal(appointments[currentAppointmentIndex])"
+          style="cursor: pointer"
+        >
+          <div
+            class="bg-white/30 backdrop-blur-md p-4 sm:p-8 rounded-xl shadow-lg border border-white/40"
+          >
             <div class="space-y-6">
               <div class="flex justify-between items-center">
                 <span class="text-2xl sm:text-3xl font-bold text-indigo-900">
                   {{ formatTime(appointments[currentAppointmentIndex].foresAppTime) }}
                 </span>
-                <span class="px-3 sm:px-4 py-2 rounded-full text-sm"
-                  :class="appointments[currentAppointmentIndex].isDone ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'">
+                <span
+                  class="px-3 sm:px-4 py-2 rounded-full text-sm"
+                  :class="
+                    appointments[currentAppointmentIndex].isDone
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-blue-100 text-blue-800'
+                  "
+                >
                   {{ appointments[currentAppointmentIndex].isDone ? 'Completed' : 'Pending' }}
                 </span>
               </div>
@@ -184,16 +218,26 @@ onMounted(() => {
             {{ currentAppointmentIndex + 1 }} / {{ appointments.length }}
           </div>
         </div>
-        <div v-else class="bg-white/30 backdrop-blur-md p-6 rounded-xl text-center max-w-2xl mx-auto">
+        <div
+          v-else
+          class="bg-white/30 backdrop-blur-md p-6 rounded-xl text-center max-w-2xl mx-auto"
+        >
           <p class="text-indigo-900">No appointments scheduled for today</p>
         </div>
       </div>
 
-      <!-- Tomorrow's Appointments -->
+<!------------------------------------------------- Tomorrow's Appointments --------------------------------------------------------------->
       <div class="mt-12 pl-4">
         <h2 class="text-2xl font-semibold text-indigo-900 mb-6">Tomorrow's Appointments</h2>
-        <div v-if="tomorrowAppointments.length > 0" class="relative mx-14 sm:mx-auto max-w-lg sm:max-w-2xl mt-12">
-          <div class="bg-white/30 backdrop-blur-md p-4 sm:p-8 rounded-xl shadow-lg border border-white/40">
+        <div
+          v-if="tomorrowAppointments.length > 0"
+          class="relative mx-14 sm:mx-auto max-w-lg sm:max-w-2xl mt-12"
+          @click="openAppointmentModal(tomorrowAppointments[currentTomorrowIndex])"
+          style="cursor: pointer"
+        >
+          <div
+            class="bg-white/30 backdrop-blur-md p-4 sm:p-8 rounded-xl shadow-lg border border-white/40"
+          >
             <div class="space-y-6">
               <div class="flex justify-between items-center">
                 <span class="text-2xl sm:text-3xl font-bold text-indigo-900">
@@ -241,9 +285,18 @@ onMounted(() => {
             {{ currentTomorrowIndex + 1 }} / {{ tomorrowAppointments.length }}
           </div>
         </div>
-        <div v-else class="bg-white/30 backdrop-blur-md p-6 rounded-xl text-center max-w-2xl mx-auto">
+        <div
+          v-else
+          class="bg-white/30 backdrop-blur-md p-6 rounded-xl text-center max-w-2xl mx-auto"
+        >
           <p class="text-indigo-900">No appointments scheduled for tomorrow</p>
         </div>
+        <AppointmentModal
+          :show="showModal"
+          :appointment="selectedAppointment"
+          @close="closeModal"
+          @update="handleAppointmentUpdate"
+        />
       </div>
     </main>
   </div>
