@@ -164,15 +164,14 @@ const handleCancel = () => {
 
 const handleSubmit = async (formData: CreateUserFormData) => {
   if (isLoading.value) return
-  isLoading.value = true
-
-  if (formData.userPass !== formData.confirmPassword) {
-    showNotification("Passwords don't match", 'error')
-    isLoading.value = false
-    return
-  }
 
   try {
+    isLoading.value = true
+
+    if (formData.userPass !== formData.confirmPassword) {
+      throw new Error("Passwords don't match")
+    }
+
     const response = await fetch('/api/users/create-user', {
       method: 'POST',
       headers: {
@@ -188,18 +187,18 @@ const handleSubmit = async (formData: CreateUserFormData) => {
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error('Server error:', errorData)
-      showNotification(errorData.message || 'Failed to create user', 'error')
-      return
+      throw new Error(errorData.message || 'Failed to create user')
     }
 
+    await fetchUsers()
     showNotification('User successfully created!', 'success')
     showForm.value = false
-    await fetchUsers()
-
   } catch (error) {
     console.error('Error creating user:', error)
-    showNotification('An error occurred while creating the user', 'error')
+    showNotification(
+      error instanceof Error ? error.message : 'An error occurred while creating the user',
+      'error'
+    )
   } finally {
     isLoading.value = false
   }
@@ -224,7 +223,9 @@ onMounted(fetchUsers)
         @close="showToast = false"
       />
 
-      <div class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+      <div
+        class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
+      >
         <div class="flex items-center gap-4 mb-8">
           <h1 class="text-3xl md:text-4xl font-medium text-sky-900">User Management</h1>
         </div>
@@ -254,9 +255,9 @@ onMounted(fetchUsers)
                 {
                   field: 'userRole',
                   values: {
-                    'manager': 'Manager',
-                    'secretary': 'Secretary',
-                    'nurse': 'Nurse',
+                    manager: 'Manager',
+                    secretary: 'Secretary',
+                    nurse: 'Nurse',
                   },
                 },
               ]"
@@ -299,9 +300,13 @@ onMounted(fetchUsers)
           class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
           @click.stop
         >
-          <div class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
+          <div
+            class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4"
+          >
             <div class="flex justify-between items-center mb-6">
-              <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">Create New User</h2>
+              <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">
+                Create New User
+              </h2>
               <button
                 @click="showForm = false"
                 class="text-sky-900/60 hover:text-sky-900 transition-colors"
@@ -327,7 +332,9 @@ onMounted(fetchUsers)
               :fields="formFields"
               submitLabel="Create User"
               @submit="handleSubmit"
-              @validation-error="showNotification('Please fill in all required fields correctly.', 'error')"
+              @validation-error="
+                showNotification('Please fill in all required fields correctly.', 'error')
+              "
               :isLoading="isLoading"
             >
               <template #buttons="{ isSubmitting }">
@@ -335,17 +342,17 @@ onMounted(fetchUsers)
                   <button
                     type="button"
                     @click="showForm = false"
-                    class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors"
-                    :disabled="isSubmitting"
+                    class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="isLoading"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2"
-                    :disabled="isSubmitting"
+                    class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="isLoading"
                   >
-                    <span v-if="isSubmitting">Creating...</span>
+                    <span v-if="isLoading">Creating...</span>
                     <span v-else>Create User</span>
                   </button>
                 </div>

@@ -39,7 +39,7 @@ const toastType = ref<'success' | 'error'>('success')
 const showForm = ref(false)
 const events = ref<CalendarEvent[]>([])
 const selectedDate = ref<Date>(new Date())
-
+const isSubmitting = ref(false) // Permet d'éviter les soumissions multiples
 const patientSuggestions = ref<{ label: string; value: number }[]>([])
 const nurseSuggestions = ref<{ label: string; value: number }[]>([])
 
@@ -140,7 +140,11 @@ const fetchSuggestions = async () => {
 }
 
 const handleFormSubmit = async (formData: Record<string, any>) => {
+  if (isSubmitting.value) return
+
   try {
+    isSubmitting.value = true
+
     const eventData: AppointmentFormData = {
       appDate: formData.appDate,
       foresAppTime: formData.foresAppTime,
@@ -166,6 +170,8 @@ const handleFormSubmit = async (formData: Record<string, any>) => {
   } catch (error) {
     console.error('Error creating appointment:', error)
     showNotification('Failed to create appointment', 'error')
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -224,7 +230,6 @@ onMounted(() => {
           @event-click="handleEventClick"
           @date-click="handleDateClick"
         >
-          <!-- Le reste du contenu reste identique -->
           <template #event-card="{ event }">
             <div
               class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-sky-200/40"
@@ -332,25 +337,26 @@ onMounted(() => {
                 ref="formRef"
                 :fields="formFields"
                 submit-label="Create Appointment"
+                :disabled="isSubmitting"
                 @submit="handleFormSubmit"
                 @validation-error="
                   () => showNotification('Please fill all required fields', 'error')
                 "
               >
-                <template #buttons="{ isSubmitting }">
+                <template #buttons>
                   <div class="flex justify-end gap-4 mt-6">
                     <button
                       type="button"
                       @click="showForm = false"
-                      class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors"
                       :disabled="isSubmitting"
+                      class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2"
                       :disabled="isSubmitting"
+                      class="px-4 py-2 bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span v-if="isSubmitting">Creating...</span>
                       <span v-else>Create Appointment</span>
