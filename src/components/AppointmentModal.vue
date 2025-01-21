@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import 'leaflet/dist/leaflet.css'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+
+// Coordonnées de Toulouse
+const TOULOUSE_COORDINATES: [number, number] = [43.6044, 1.4417] // Rue du Taur
 
 interface Performance {
   idPerf: number
@@ -21,14 +24,40 @@ interface Trainee {
   traineeFirstName: string
 }
 
+interface Appointment {
+  idApp: number
+  clientAddress: string
+}
+
 const props = defineProps<{
   show: boolean
-  appointment: any
+  appointment: Appointment | null
 }>()
 
 const emit = defineEmits(['close', 'update'])
 
-const map = ref<L.Map>(null as unknown as L.Map)
+// Génération de coordonnées aléatoires autour de Toulouse
+const generateRandomCoordinates = () => {
+  const latVariation = (Math.random() - 0.5) * 0.06
+  const lngVariation = (Math.random() - 0.5) * 0.06
+
+  return [
+    TOULOUSE_COORDINATES[0] + latVariation,
+    TOULOUSE_COORDINATES[1] + lngVariation
+  ] as [number, number]
+}
+
+// Refs pour la carte
+const mapContainer = ref<HTMLElement | null>(null)
+const map = ref<L.Map | null>(null)
+const marker = ref<L.Marker | null>(null)
+const center = ref<L.LatLngExpression>(generateRandomCoordinates())
+const zoom = ref(13)
+
+// Type pour la carte Leaflet
+type LeafletMap = L.Map
+
+// Refs pour les données
 const selectedCategory = ref<number | null>(null)
 const categories = ref<Category[]>([])
 const performances = ref<Performance[]>([])
@@ -37,30 +66,71 @@ const trainees = ref<Trainee[]>([])
 const selectedTrainee = ref<number | null>(null)
 const hasTrainee = ref(false)
 
+// Initialisation de la carte
+const initMap = () => {
+  if (!mapContainer.value) return
+
+  // Création de la carte
+  const newMap: LeafletMap = L.map(mapContainer.value)
+  map.value = newMap
+  newMap.setView(center.value, zoom.value)
+
+  // Ajout du layer OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(newMap)
+
+  // Ajout du marker
+  const newMarker = L.marker(center.value, {
+    title: props.appointment?.clientAddress || 'Adresse client'
+  })
+  marker.value = newMarker
+  newMarker.addTo(newMap)
+
+  // Gestion du clic sur la carte
+  map.value.on('click', (e: L.LeafletMouseEvent) => {
+    const newPos: [number, number] = [e.latlng.lat, e.latlng.lng]
+    center.value = newPos
+    marker.value?.setLatLng(newPos)
+  })
+}
+
+// Nettoyage de la carte
+const cleanupMap = () => {
+  if (map.value) {
+    map.value.remove()
+    map.value = null
+  }
+}
+
+// Appels API
 const fetchCategories = async () => {
   try {
     const response = await fetch('/api/perf/categories', {
       credentials: 'include',
     })
-    if (response.ok) {
-      categories.value = await response.json()
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    categories.value = await response.json()
   } catch (error) {
     console.error('Error fetching categories:', error)
   }
 }
 
 const fetchPerformancesByCategory = async () => {
-  if (!selectedCategory.value) return
+  if (!selectedCategory.value) {
+    performances.value = []
+    return
+  }
+
   try {
     const response = await fetch(`/api/perf/by-category/${selectedCategory.value}`, {
       credentials: 'include',
     })
-    if (response.ok) {
-      performances.value = await response.json()
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    performances.value = await response.json()
   } catch (error) {
     console.error('Error fetching performances:', error)
+    performances.value = []
   }
 }
 
@@ -69,74 +139,40 @@ const fetchTrainees = async () => {
     const response = await fetch('/api/trainee/all', {
       credentials: 'include',
     })
-    if (response.ok) {
-      trainees.value = await response.json()
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    trainees.value = await response.json()
   } catch (error) {
     console.error('Error fetching trainees:', error)
+    trainees.value = []
   }
 }
 
 const checkTraineePresence = async () => {
-  if (!props.appointment) return
+  if (!props.appointment?.idApp) return
+
   try {
     const response = await fetch(`/api/trainee/check-presence/${props.appointment.idApp}`, {
       credentials: 'include',
     })
-    if (response.ok) {
-      const data = await response.json()
-      hasTrainee.value = data.present
-      selectedTrainee.value = data.traineeId || null
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    hasTrainee.value = data.present
+    selectedTrainee.value = data.traineeId || null
   } catch (error) {
     console.error('Error checking trainee presence:', error)
-  }
-}
-
-const initMap = () => {
-  if (!props.appointment) return
-
-  if (map.value) {
-    map.value.remove()
-  }
-
-  const mapContainer = document.getElementById('map')
-  if (mapContainer) {
-    map.value = L.map(mapContainer).setView([0, 0], 13)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-    })
-
-    fetchCoordinates(props.appointment.clientAddress)
-  }
-}
-
-const fetchCoordinates = async (address: string) => {
-  if (!map.value) return
-
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
-    )
-    const data = await response.json()
-    if (data && data[0]) {
-      const { lat, lon } = data[0]
-      const latNum = parseFloat(lat)
-      const lonNum = parseFloat(lon)
-
-      if (!isNaN(latNum) && !isNaN(lonNum)) {
-        map.value.setView([latNum, lonNum], 13)
-        L.marker([latNum, lonNum]).addTo(map.value as L.Map)
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching coordinates:', error)
+    hasTrainee.value = false
+    selectedTrainee.value = null
   }
 }
 
 const saveAppointmentDetails = async () => {
+  if (!props.appointment?.idApp || !selectedPerformance.value) {
+    console.error('Missing required data')
+    return
+  }
+
   try {
-    await fetch('/api/perf/save-appointment', {
+    const response = await fetch('/api/perf/save-appointment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,9 +182,13 @@ const saveAppointmentDetails = async () => {
         idApp: props.appointment.idApp,
         idPerf: selectedPerformance.value,
         hasTrainee: hasTrainee.value,
-        idTrainee: selectedTrainee.value,
+        idTrainee: hasTrainee.value ? selectedTrainee.value : null,
+        coordinates: center.value
       }),
     })
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+
     emit('update')
     emit('close')
   } catch (error) {
@@ -156,19 +196,39 @@ const saveAppointmentDetails = async () => {
   }
 }
 
+// Gestion du cycle de vie
+onMounted(() => {
+  if (props.show) {
+    nextTick(() => {
+      initMap()
+    })
+  }
+})
+
+onUnmounted(() => {
+  cleanupMap()
+})
+
+// Watchers
 watch(
   () => props.show,
   (newValue) => {
     if (newValue) {
+      // Reset des valeurs
+      selectedPerformance.value = null
+      center.value = generateRandomCoordinates()
+
+      // Chargement des données
       fetchCategories()
       fetchTrainees()
       checkTraineePresence()
-      setTimeout(initMap, 100)
+
+      // Initialisation de la carte
+      nextTick(() => {
+        initMap()
+      })
     } else {
-      if (map.value) {
-        map.value.remove()
-        map.value = null as unknown as L.Map
-      }
+      cleanupMap()
     }
   }
 )
@@ -176,7 +236,16 @@ watch(
 watch(
   () => selectedCategory.value,
   () => {
+    selectedPerformance.value = null
     fetchPerformancesByCategory()
+  }
+)
+
+watch(
+  () => center.value,
+  (newPos) => {
+    marker.value?.setLatLng(newPos)
+    map.value?.setView(newPos, zoom.value)
   }
 )
 </script>
@@ -187,15 +256,17 @@ watch(
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
     <div class="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-      <h2 class="text-2xl font-bold mb-4">Appointment Details</h2>
+      <h2 class="text-2xl font-bold mb-4">Détails du rendez-vous</h2>
 
-      <div id="map" class="h-64 mb-6 rounded-lg"></div>
+      <div class="h-64 mb-6 rounded-lg overflow-hidden">
+        <div ref="mapContainer" class="w-full h-full"></div>
+      </div>
 
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <label class="block mb-2">Category</label>
+          <label class="block mb-2">Catégorie</label>
           <select v-model="selectedCategory" class="w-full p-2 border rounded">
-            <option value="">Select category</option>
+            <option :value="null">Sélectionner une catégorie</option>
             <option v-for="cat in categories" :key="cat.idCat" :value="cat.idCat">
               {{ cat.catName }}
             </option>
@@ -203,9 +274,13 @@ watch(
         </div>
 
         <div>
-          <label class="block mb-2">Performance</label>
-          <select v-model="selectedPerformance" class="w-full p-2 border rounded">
-            <option value="">Select performance</option>
+          <label class="block mb-2">Prestation</label>
+          <select
+            v-model="selectedPerformance"
+            class="w-full p-2 border rounded"
+            :disabled="!selectedCategory"
+          >
+            <option :value="null">Sélectionner une prestation</option>
             <option v-for="perf in performances" :key="perf.idPerf" :value="perf.idPerf">
               {{ perf.perfName }} - {{ perf.perfPrice }}€
             </option>
@@ -216,11 +291,15 @@ watch(
       <div class="mb-6">
         <label class="flex items-center mb-2">
           <input type="checkbox" v-model="hasTrainee" class="mr-2" />
-          Trainee present
+          Stagiaire présent
         </label>
 
-        <select v-if="hasTrainee" v-model="selectedTrainee" class="w-full p-2 border rounded">
-          <option value="">Select trainee</option>
+        <select
+          v-if="hasTrainee"
+          v-model="selectedTrainee"
+          class="w-full p-2 border rounded"
+        >
+          <option :value="null">Sélectionner un stagiaire</option>
           <option v-for="trainee in trainees" :key="trainee.idTrainee" :value="trainee.idTrainee">
             {{ trainee.traineeName }} {{ trainee.traineeFirstName }}
           </option>
@@ -228,11 +307,30 @@ watch(
       </div>
 
       <div class="flex justify-end gap-4">
-        <button @click="emit('close')" class="px-4 py-2 border rounded">Cancel</button>
-        <button @click="saveAppointmentDetails" class="px-4 py-2 bg-indigo-600 text-white rounded">
-          Save
+        <button
+          @click="emit('close')"
+          class="px-4 py-2 border rounded hover:bg-gray-100"
+        >
+          Annuler
+        </button>
+        <button
+          @click="saveAppointmentDetails"
+          :disabled="!selectedPerformance"
+          class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:bg-gray-400"
+        >
+          Enregistrer
         </button>
       </div>
     </div>
   </div>
 </template>
+
+<style>
+@import 'leaflet/dist/leaflet.css';
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+}
+</style>

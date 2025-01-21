@@ -152,7 +152,7 @@ onMounted(() => {
         </p>
       </div>
 
-<!------------------------------------- Today's Appointments ------------------------------------------------->
+      <!------------------------------------- Today's Appointments ------------------------------------------------->
       <div class="mt-6 pl-4">
         <h2 class="text-2xl font-semibold text-indigo-900 mb-6">Today's Appointments</h2>
         <div
@@ -199,7 +199,7 @@ onMounted(() => {
           </div>
 
           <button
-            @click="previousAppointment"
+            @click.stop="previousAppointment"
             :disabled="currentAppointmentIndex === 0"
             class="absolute top-1/2 -translate-y-1/2 -left-12 sm:-left-16 p-3 rounded-full bg-white/70 text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90 transition-colors shadow-md"
           >
@@ -207,7 +207,7 @@ onMounted(() => {
           </button>
 
           <button
-            @click="nextAppointment"
+            @click.stop="nextAppointment"
             :disabled="currentAppointmentIndex === appointments.length - 1"
             class="absolute top-1/2 -translate-y-1/2 -right-12 sm:-right-16 p-3 rounded-full bg-white/70 text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90 transition-colors shadow-md"
           >
@@ -226,7 +226,7 @@ onMounted(() => {
         </div>
       </div>
 
-<!------------------------------------------------- Tomorrow's Appointments --------------------------------------------------------------->
+      <!------------------------------------------------- Tomorrow's Appointments --------------------------------------------------------------->
       <div class="mt-12 pl-4">
         <h2 class="text-2xl font-semibold text-indigo-900 mb-6">Tomorrow's Appointments</h2>
         <div
@@ -266,7 +266,7 @@ onMounted(() => {
           </div>
 
           <button
-            @click="previousTomorrowAppointment"
+            @click.stop="previousTomorrowAppointment"
             :disabled="currentTomorrowIndex === 0"
             class="absolute top-1/2 -translate-y-1/2 -left-12 sm:-left-16 p-3 rounded-full bg-white/70 text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90 transition-colors shadow-md"
           >
@@ -274,7 +274,7 @@ onMounted(() => {
           </button>
 
           <button
-            @click="nextTomorrowAppointment"
+            @click.stop="nextTomorrowAppointment"
             :disabled="currentTomorrowIndex === tomorrowAppointments.length - 1"
             class="absolute top-1/2 -translate-y-1/2 -right-12 sm:-right-16 p-3 rounded-full bg-white/70 text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90 transition-colors shadow-md"
           >
