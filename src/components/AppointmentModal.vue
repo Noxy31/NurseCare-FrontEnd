@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import type { Map as LeafletMap, LatLngExpression, Marker, Polyline } from 'leaflet'
+import { generateInvoice } from '@/services/InvoiceService';
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Toast from './ToastNotification.vue'
@@ -29,8 +30,9 @@ interface Trainee {
 }
 
 interface Appointment {
-  idApp: number
-  clientAddress: string
+  idApp: number;
+  clientAddress: string;
+  clientName: string;
 }
 
 const props = defineProps<{
@@ -289,50 +291,72 @@ const checkTraineePresence = async () => {
 }
 
 const saveAppointmentDetails = async () => {
-  if (!props.appointment?.idApp || selectedPerformances.value.length === 0 || !lastLocation.value) {
-    toastMessage.value = 'Data missing'
-    toastType.value = 'error'
-    showToast.value = true
-    return
-  }
-// On evite les doubles soumissions avec isSaving
-  if (isSaving.value) return
-  isSaving.value = true
+ if (!props.appointment?.idApp || selectedPerformances.value.length === 0 || !lastLocation.value) {
+   toastMessage.value = 'Data missing'
+   toastType.value = 'error'
+   showToast.value = true
+   return
+ }
 
-  try {
-    const response = await fetch('/api/perf/save-appointment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        idApp: props.appointment.idApp,
-        performances: selectedPerformances.value.map((perf: Performance) => ({
-          idPerf: perf.idPerf,
-        })),
-        hasTrainee: hasTrainee.value,
-        idTrainee: hasTrainee.value ? selectedTrainee.value : null,
-        coordinates: lastLocation.value,
-      }),
-    })
+ if (isSaving.value) return
+ isSaving.value = true
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+ try {
+   const response = await fetch('/api/perf/save-appointment', {
+     method: 'POST',
+     headers: {
+       'Content-Type': 'application/json',
+     },
+     credentials: 'include',
+     body: JSON.stringify({
+       idApp: props.appointment.idApp,
+       performances: selectedPerformances.value.map((perf: Performance) => ({
+         idPerf: perf.idPerf,
+         perfPrice: perf.perfPrice
+       })),
+       hasTrainee: hasTrainee.value,
+       idTrainee: hasTrainee.value ? selectedTrainee.value : null,
+       coordinates: lastLocation.value,
+     }),
+   });
 
-    toastMessage.value = 'Appointment details saved'
-    toastType.value = 'success'
-    showToast.value = true
+   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+   const responseData = await response.json();
 
-    emit('update')
-    emit('close')
-  } catch (error) {
-    console.error('Error saving appointment details:', error)
-    toastMessage.value = "Error saving appointment details"
-    toastType.value = 'error'
-    showToast.value = true
-  } finally {
-    isSaving.value = false
-  }
+   // Calculer le total
+   const total = selectedPerformances.value.reduce((sum, perf) => sum + perf.perfPrice, 0);
+
+   // Générer la facture
+   const { doc, date } = generateInvoice(
+     responseData.idBill,
+     {
+       clientName: props.appointment.clientName || 'Non renseigné',
+       clientAddress: props.appointment.clientAddress
+     },
+     selectedPerformances.value
+   );
+
+   // Télécharger le PDF avec la date et l'id
+   const fileName = `facture_${date}-${responseData.idBill}.pdf`;
+   doc.save(fileName);
+
+   // Ouvrir dans un nouvel onglet
+   const pdfDataUri = doc.output('datauristring');
+   window.open(pdfDataUri);
+
+   toastMessage.value = 'Appointment details saved'
+   toastType.value = 'success'
+   showToast.value = true
+   emit('update')
+   emit('close')
+ } catch (error) {
+   console.error('Error saving appointment details:', error)
+   toastMessage.value = "Error saving appointment details"
+   toastType.value = 'error'
+   showToast.value = true
+ } finally {
+   isSaving.value = false
+ }
 }
 
 // Lifecycle hooks et watchers
