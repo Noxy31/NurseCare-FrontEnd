@@ -35,6 +35,7 @@
     "leaflet": "^1.9.4",
     "lucide-vue-next": "^0.456.0",
     "nursecare-frontend": "file:",
+    "pdfmake": "^0.2.18",
     "vite": "^6.0.11",
     "vite-plugin-vue": "^0.0.1",
     "vue-map-ui": "^0.0.18"
