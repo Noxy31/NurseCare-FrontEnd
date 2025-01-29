@@ -341,8 +341,8 @@ const saveAppointmentDetails = async () => {
    doc.save(fileName);
 
    // Ouvrir dans un nouvel onglet
-   const pdfDataUri = doc.output('datauristring');
-   window.open(pdfDataUri);
+  //  const pdfDataUri = doc.output('datauristring');
+  //  window.open(pdfDataUri);
 
    toastMessage.value = 'Appointment details saved'
    toastType.value = 'success'
