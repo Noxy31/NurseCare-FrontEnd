@@ -209,7 +209,7 @@ const initMap = () => {
 const addPerformance = () => {
   if (!selectedPerformance.value) return
 
-  const performanceToAdd = performances.value.find((p) => p.idPerf === selectedPerformance.value)
+  const performanceToAdd = performances.value.find((p: Performance) => p.idPerf === selectedPerformance.value)
   if (performanceToAdd) {
     selectedPerformances.value.push({
       ...performanceToAdd,
@@ -308,7 +308,7 @@ const saveAppointmentDetails = async () => {
       credentials: 'include',
       body: JSON.stringify({
         idApp: props.appointment.idApp,
-        performances: selectedPerformances.value.map((perf) => ({
+        performances: selectedPerformances.value.map((perf: Performance) => ({
           idPerf: perf.idPerf,
         })),
         hasTrainee: hasTrainee.value,
