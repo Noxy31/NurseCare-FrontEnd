@@ -12,7 +12,7 @@ const bills = ref([])
 interface Bill {
   idBill: number
   billStatus: string
-  totalAmount: number
+  totalAmount: string
   idApp: number
   appDate: string
   foresAppTime: string
@@ -77,7 +77,7 @@ const fetchBills = async () => {
       throw new Error(errorData.error || 'Failed to fetch bills')
     }
     const data = await response.json()
-    console.log('Bills received:', data) // Pour déboguer
+    console.log('Bills received:', data)
 
     bills.value = data.map((bill: Bill) => ({
       ...bill,
