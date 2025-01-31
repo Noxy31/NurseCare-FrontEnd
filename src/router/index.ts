@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 import Login from '@/components/Login.vue'
 import AccessDenied from '@/components/AccessDenied.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
+import NursesBills from '@/components/Nurses/NursesBills.vue'
 
 // composants pour secretaires
 import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
@@ -83,6 +84,12 @@ const routes: Array<RouteRecordRaw> = [
     component: NurseAgenda,
     meta: { requiresAuth: true, requiresNurse: true },
   },
+  {
+    path: '/NBills',
+    name: 'NursesBills',
+    component: NursesBills,
+    meta: { requiresAuth: true, requiresNurse: true },
+  }
 ]
 
 const router = createRouter({
