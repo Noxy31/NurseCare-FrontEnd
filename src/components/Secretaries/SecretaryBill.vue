@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import DataTable from '../DataTab.vue'
 import NavBar from '@/components/NavBar.vue'
 import type { TableItem } from '../DataTab.vue'
 import ToastNotification from '../ToastNotification.vue'
 
-type BillStatus = 'pending' | 'paid' | 'cancelled'
+type BillStatus = 'Pending' | 'Accepted' | 'Paid'
 
 interface Bill extends TableItem {
   idBill: number
@@ -43,20 +43,28 @@ const secretaryNavItems = [
   { name: 'Users', path: '/users', icon: 'UserCog' },
 ]
 
-// Status mapping for the table
 const statusMapping = {
   field: 'billStatus',
   values: {
-    pending: 'En attente',
-    paid: 'Payée',
-    cancelled: 'Annulée'
-  } as Record<BillStatus, string>
+    Pending: 'Pending',
+    Accepted: 'Accepted',
+    Paid: 'Paid',
+  } as Record<BillStatus, string>,
 }
 
-onMounted(async () => {
+const dateMapping = computed(() => ({
+  field: 'appDate',
+  values: bills.value.reduce((acc, bill) => {
+    acc[bill.appDate] = formatDate(bill.appDate)
+    return acc
+  }, {} as Record<string, string>)
+}))
+
+// Fetch bills
+const fetchBills = async () => {
   try {
-    const response = await fetch('/api/get-bills', {
-      credentials: 'include'
+    const response = await fetch('/api/bill/get-all-bills', {
+      credentials: 'include',
     })
     if (response.ok) {
       bills.value = await response.json()
@@ -66,7 +74,61 @@ onMounted(async () => {
   } catch (error) {
     showNotification('Error connecting to server', 'error')
   }
-})
+}
+
+onMounted(fetchBills)
+
+// Handle bill deletion
+const handleDelete = async (id: number) => {
+  const confirmed = confirm('Are you sure that you want to delete this bill?')
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    const response = await fetch(`/api/bill/delete-bill/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+
+    if (response.ok) {
+      bills.value = bills.value.filter((bill) => bill.idBill !== id)
+      showNotification('Bill successfully deleted', 'success')
+    } else {
+      showNotification('Error deleting bill', 'error')
+    }
+  } catch (error) {
+    showNotification('Error connecting to server', 'error')
+  }
+}
+
+// Handle bill update
+const handleUpdate = async (item: TableItem) => {
+  const bill = item as Bill
+  try {
+    const response = await fetch('/api/bill/update-bill', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idBill: bill.idBill,
+        billStatus: bill.billStatus,
+        totalAmount: parseFloat(bill.totalAmount.toString().replace(/[^0-9.-]+/g, '')),
+      }),
+    })
+
+    if (response.ok) {
+      await fetchBills() // Refresh the bills list
+      showNotification('Bill successfully updated', 'success')
+    } else {
+      showNotification('Error updating bill', 'error')
+    }
+  } catch (error) {
+    showNotification('Error connecting to server', 'error')
+  }
+}
 
 const handleRowClick = (item: TableItem) => {
   selectedBill.value = item as Bill
@@ -84,12 +146,24 @@ const formatTime = (time: string) => {
 const formatAmount = (amount: number) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR'
+    currency: 'EUR',
   }).format(amount)
 }
 
 const getStatusDisplay = (status: BillStatus): string => {
   return statusMapping.values[status]
+}
+
+// Ajout de la gestion de l'annulation
+const originalBills = ref<Bill[]>([])
+
+// Mise à jour de fetchBills pour sauvegarder l'état original
+
+const handleCancel = (item: TableItem) => {
+  const originalBill = originalBills.value.find((bill) => bill.idBill === item.idBill)
+  if (originalBill) {
+    Object.assign(item, originalBill)
+  }
 }
 </script>
 
@@ -105,9 +179,14 @@ const getStatusDisplay = (status: BillStatus): string => {
         @close="showToast = false"
       />
 
-      <div class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40">
+      <div
+        class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
+      >
         <div>
           <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Liste des factures</h2>
+          <p class="text-sm text-sky-900/70 italic mb-4">
+            *Le status of a bill must be : pending, accepted or paid only.
+          </p>
           <div class="overflow-x-auto min-w-0">
             <DataTable
               :headers="[
@@ -117,15 +196,15 @@ const getStatusDisplay = (status: BillStatus): string => {
                 { actual: 'clientName', display: 'Patient' },
                 { actual: 'appDate', display: 'Date RDV' },
               ]"
-              :items="bills.map(bill => ({
-                ...bill,
-                totalAmount: formatAmount(bill.totalAmount),
-                appDate: formatDate(bill.appDate)
-              }))"
+              :items="bills"
               rowKey="idBill"
-              :isClickable="true"
+              :read-only="false"
+              :editableFields="['billStatus']"
+              @delete="handleDelete"
+              @update="handleUpdate"
+              @cancel="handleCancel"
               @row-click="handleRowClick"
-              :valueMappings="[statusMapping]"
+              :valueMappings="[statusMapping, dateMapping]"
             />
           </div>
         </div>
@@ -160,7 +239,9 @@ const getStatusDisplay = (status: BillStatus): string => {
           class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-50"
           @click.stop
         >
-          <div class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4">
+          <div
+            class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/40 mx-4"
+          >
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">
                 Détails de la facture #{{ selectedBill.idBill }}

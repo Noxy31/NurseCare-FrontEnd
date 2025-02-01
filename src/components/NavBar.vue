@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Cookies from 'js-cookie'
-import { Menu, X, Calendar, Receipt, Users, UserCog, LogOut, Home, FileText, UserCircle } from 'lucide-vue-next'
+import { Menu, X, Calendar, Receipt, Users, UserCog, LogOut, Home, FileText, UserCircle, UserPen } from 'lucide-vue-next'
 
 interface NavItem {
   name: string
@@ -23,7 +23,8 @@ const getIcon = (iconName: string) => {
     Users,
     UserCog,
     FileText,
-    UserCircle
+    UserCircle,
+    UserPen,
   }
   return icons[iconName as keyof typeof icons]
 }

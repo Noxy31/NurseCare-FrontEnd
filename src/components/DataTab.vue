@@ -26,12 +26,16 @@ const props = withDefaults(
     isCheckable?: boolean
     selectedOrders?: number[]
     valueMappings?: ValueMapping[]
+    readOnly?: boolean
+    editableFields?: string[]
   }>(),
   {
     isClickable: false,
     isCheckable: false,
     selectedOrders: () => [],
     valueMappings: () => [],
+    readOnly: true,
+    editableFields: () => [],
   }
 )
 
@@ -190,9 +194,19 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
                 <template v-if="item.isEditing">
                   <div class="max-w-full overflow-hidden">
                     <input
+                      v-if="
+                        !readOnly &&
+                        (!editableFields.length || editableFields.includes(header.actual))
+                      "
                       v-model="item[header.actual]"
                       class="w-full p-1 md:p-2 border border-sky-700/30 rounded-lg bg-sky-100/20 text-sky-900 text-xs md:text-sm focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-all duration-300"
                     />
+                    <div
+                      v-else
+                      class="whitespace-normal break-words min-w-[120px] max-w-[200px] mx-auto h-auto"
+                    >
+                      {{ formatValue(item[header.actual], header.actual) }}
+                    </div>
                   </div>
                 </template>
                 <template v-else>
@@ -228,7 +242,8 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
                     <template v-if="isCheckable">
                       <span class="text-sky-900 text-xs md:text-sm">Select</span>
                     </template>
-                    <template v-else>
+                    <!-- Modifiez cette partie pour n'afficher les boutons que si !readOnly -->
+                    <template v-else-if="!readOnly">
                       <div class="flex gap-1 md:gap-2">
                         <button
                           @click="startEdit(item, $event)"

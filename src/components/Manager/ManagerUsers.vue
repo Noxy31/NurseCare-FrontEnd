@@ -8,20 +8,29 @@ import type { FormField } from '../DynamicForm.vue'
 import ToastNotification from '../ToastNotification.vue'
 import { useRouter } from 'vue-router'
 
-interface Client {
-  idClient: number
-  clientName: string
-  clientAddress: string
-  clientPhone: string
-  clientMail: string
+interface User {
+  idUser: number
+  userName: string
+  userMail: string
+  userRole: string
 }
 
 interface CreateUserFormData {
-  clientName: string
-  clientMail: string
-  clientPhone: string
-  clientAddress: string
+  userName: string
+  userMail: string
+  userPass: string
+  confirmPassword: string
+  userRole: boolean
 }
+
+const managerNavItems = [
+  { name: 'Overview', path: '/MHome', icon: 'Home' },
+  { name: 'Agenda', path: '/MAgenda', icon: 'Calendar' },
+  { name: 'Users', path: '/MUsers', icon: 'UserCog' },
+  { name: 'Trainee', path: '/MTrainee', icon: 'UserPen' },
+  // { name: 'Profile', path: '/NProfile', icon: 'UserCircle' },
+]
+
 const showForm = ref(false)
 const isLoading = ref(false)
 const router = useRouter()
@@ -35,138 +44,144 @@ const showNotification = (message: string, type: 'success' | 'error') => {
   showToast.value = true
 }
 
-const secretaryNavItems = [
-  { name: 'Home', path: '/SHome', icon: 'Home' },
-  { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
-  { name: 'Bills', path: '/SBills', icon: 'Receipt' },
-  { name: 'Patients', path: '/patients', icon: 'Users' },
-  { name: 'Users', path: '/users', icon: 'UserCog' },
-]
-
 const formFields: FormField[] = [
   {
-    name: 'clientName',
-    label: 'Patient Name',
+    name: 'userName',
+    label: 'User Name',
     type: 'text',
-    placeholder: 'Enter the name of the patient ',
+    placeholder: 'Enter the name of the user',
   },
   {
-    name: 'clientMail',
-    label: 'Patient E-mail',
+    name: 'userMail',
+    label: 'E-mail',
     type: 'email',
     placeholder: 'Enter the e-mail address',
   },
   {
-    name: 'clientPhone',
-    label: 'Patient Phone',
-    type: 'text',
-    placeholder: 'Enter the phone number',
+    name: 'userPass',
+    label: 'Password',
+    type: 'password',
+    placeholder: 'Enter the password',
   },
   {
-    name: 'clientAddress',
-    label: 'Patient Address',
-    type: 'text',
-    placeholder: 'Enter the address',
+    name: 'confirmPassword',
+    label: 'Confirm Password',
+    type: 'password',
+    placeholder: 'Confirm the password',
+  },
+  {
+    name: 'userRole',
+    label: 'User Role',
+    type: 'select',
+    placeholder: 'Select a role',
+    options: [
+      { label: 'Manager', value: 'manager' },
+      { label: 'Secretary', value: 'secretary' },
+      { label: 'Nurse', value: 'nurse' },
+    ],
   },
 ]
 
-const clients = ref<TableItem[]>([])
-const originalClients = ref<TableItem[]>([])
+const users = ref<TableItem[]>([])
+const originalUsers = ref<TableItem[]>([])
 
-const fetchClients = async () => {
+const fetchUsers = async () => {
   try {
-    const response = await fetch('/api/client/get-clients')
+    const response = await fetch('/api/users/get-users')
     if (!response.ok) {
-      throw new Error('Network response was not ok on fetching clients')
+      throw new Error('Network response was not ok')
     }
     const data = await response.json()
-    clients.value = data as TableItem[]
-    originalClients.value = JSON.parse(JSON.stringify(data)) as TableItem[]
-    console.log(clients.value)
+    users.value = data as TableItem[]
+    originalUsers.value = JSON.parse(JSON.stringify(data)) as TableItem[]
+    console.log(users.value)
   } catch (error) {
     console.error('Error fetching users:', error)
   }
 }
 
-const handleDelete = async (idClient: number) => {
-  const confirmed = confirm('Are you sure that you want to delete this client?')
+const handleDelete = async (idUser: number) => {
+  const confirmed = confirm('Are you sure that you want to delete this user?')
   if (!confirmed) {
     return
   }
 
   try {
-    const response = await fetch('/api/client/delete-client', {
+    const response = await fetch('/api/users/delete-users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ idClient }),
+      body: JSON.stringify({ idUser }),
     })
 
     if (!response.ok) {
-      showNotification('Failed to delete client', 'error')
-      throw new Error('Failed to delete client')
+      showNotification('Failed to delete user', 'error')
+      throw new Error('Failed to delete user')
     }
 
-    await fetchClients()
-    showNotification('Client deleted successfully', 'success')
+    await fetchUsers()
+    showNotification('User deleted successfully', 'success')
   } catch (error) {
-    console.error('Error deleting client:', error)
-    showNotification('Error occurred while deleting client', 'error')
+    console.error('Error deleting user:', error)
+    showNotification('Error occurred while deleting user', 'error')
   }
 }
 
 const handleUpdate = async (item: TableItem) => {
   try {
-    const updatedClient: Client = {
-      idClient: item.idClient as number,
-      clientName: item.clientName as string,
-      clientPhone: item.clientPhone as string,
-      clientMail: item.clientMail as string,
-      clientAddress: item.clientAddress as string,
+    const updatedUser: User = {
+      idUser: item.idUser as number,
+      userName: item.userName as string,
+      userMail: item.userMail as string,
+      userRole: item.userRole as string,
     }
 
-    const response = await fetch('/api/client/update-client', {
+    const response = await fetch('/api/users/update-user', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(updatedClient),
+      body: JSON.stringify(updatedUser),
     })
 
     if (!response.ok) {
-      showNotification('Failed to update client', 'error')
-      throw new Error('Failed to update client')
+      showNotification('Failed to update user', 'error')
+      throw new Error('Failed to update user')
     }
 
-    await fetchClients()
-    showNotification('Client updated successfully', 'success')
+    await fetchUsers()
+    showNotification('User updated successfully', 'success')
   } catch (error) {
-    console.error('Error updating client:', error)
-    showNotification('Error occurred while updating client', 'error')
+    console.error('Error updating user:', error)
+    showNotification('Error occurred while updating user', 'error')
   }
 }
 
 const handleCancel = () => {
-  clients.value = JSON.parse(JSON.stringify(originalClients.value))
+  users.value = JSON.parse(JSON.stringify(originalUsers.value))
 }
 
 const handleSubmit = async (formData: CreateUserFormData) => {
-  if (isLoading.value) return // Protection contre les soumissions multiples
+  if (isLoading.value) return
 
   try {
-    isLoading.value = true // Active le flag de soumission
+    isLoading.value = true
 
-    const response = await fetch('/api/client/create-client', {
+    if (formData.userPass !== formData.confirmPassword) {
+      throw new Error("Passwords don't match")
+    }
+
+    const response = await fetch('/api/users/create-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        clientName: formData.clientName,
-        clientMail: formData.clientMail,
-        clientPhone: formData.clientPhone,
-        clientAddress: formData.clientAddress,
+        userName: formData.userName,
+        userMail: formData.userMail,
+        userPass: formData.userPass,
+        userRole: formData.userRole,
       }),
     })
 
@@ -175,13 +190,13 @@ const handleSubmit = async (formData: CreateUserFormData) => {
       throw new Error(errorData.message || 'Failed to create user')
     }
 
-    await fetchClients()
-    showNotification('Patient successfully created!', 'success')
+    await fetchUsers()
+    showNotification('User successfully created!', 'success')
     showForm.value = false
   } catch (error) {
-    console.error('Error creating patient:', error)
+    console.error('Error creating user:', error)
     showNotification(
-      error instanceof Error ? error.message : 'An error occurred while creating the patient',
+      error instanceof Error ? error.message : 'An error occurred while creating the user',
       'error'
     )
   } finally {
@@ -193,12 +208,12 @@ const toggleForm = () => {
   showForm.value = !showForm.value
 }
 
-onMounted(fetchClients)
+onMounted(fetchUsers)
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <NavBar :navItems="secretaryNavItems" class="fixed z-50" />
+  <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
+    <NavBar :navItems="managerNavItems" class="fixed z-50" />
 
     <main class="flex-1 w-full min-w-0 p-4 sm:ml-64 sm:p-6">
       <ToastNotification
@@ -211,10 +226,8 @@ onMounted(fetchClients)
       <div
         class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
       >
-        <div class="flex items-center gap-4 mb-6 sm:mb-8">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">
-            Patient Management
-          </h1>
+        <div class="flex items-center gap-4 mb-8">
+          <h1 class="text-3xl md:text-4xl font-medium text-sky-900">User Management</h1>
         </div>
 
         <div class="mb-12 flex flex-col items-center">
@@ -222,23 +235,35 @@ onMounted(fetchClients)
             @click="toggleForm"
             class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
           >
-            <span>Create New Patient</span>
+            <span>Create New User</span>
           </button>
         </div>
 
-        <div>
-          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Patient List</h2>
+        <div class="mb-8">
+          <h2 class="text-2xl md:text-3xl font-medium text-sky-900 mb-4">User List</h2>
+          <p class="text-sm text-sky-900/70 italic mb-4">
+            *The role of an user must be : nurse, secretary or manager only.
+          </p>
           <div class="overflow-x-auto min-w-0">
             <DataTable
               :headers="[
-                { actual: 'idClient', display: 'ID' },
-                { actual: 'clientName', display: 'Name' },
-                { actual: 'clientPhone', display: 'Phone' },
-                { actual: 'clientMail', display: 'Email' },
-                { actual: 'clientAddress', display: 'Address' },
+                { actual: 'idUser', display: 'ID' },
+                { actual: 'userName', display: 'Name' },
+                { actual: 'userMail', display: 'Email' },
+                { actual: 'userRole', display: 'Role' },
               ]"
-              :items="clients"
-              rowKey="idClient"
+              :items="users"
+              rowKey="idUser"
+              :valueMappings="[
+                {
+                  field: 'userRole',
+                  values: {
+                    manager: 'Manager',
+                    secretary: 'Secretary',
+                    nurse: 'Nurse',
+                  },
+                },
+              ]"
               :read-only="false"
               @delete="handleDelete"
               @update="handleUpdate"
@@ -284,7 +309,7 @@ onMounted(fetchClients)
           >
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">
-                Create New Patient
+                Create New User
               </h2>
               <button
                 @click="showForm = false"
@@ -309,7 +334,7 @@ onMounted(fetchClients)
 
             <DynamicForm
               :fields="formFields"
-              submitLabel="Create Patient"
+              submitLabel="Create User"
               @submit="handleSubmit"
               @validation-error="
                 showNotification('Please fill in all required fields correctly.', 'error')
@@ -332,7 +357,7 @@ onMounted(fetchClients)
                     :disabled="isLoading"
                   >
                     <span v-if="isLoading">Creating...</span>
-                    <span v-else>Create Patient</span>
+                    <span v-else>Create User</span>
                   </button>
                 </div>
               </template>

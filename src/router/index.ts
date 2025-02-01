@@ -4,18 +4,23 @@ import Cookies from 'js-cookie'
 import Login from '@/components/Login.vue'
 import AccessDenied from '@/components/AccessDenied.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
-import NursesBills from '@/components/Nurses/NursesBills.vue'
 
 // composants pour secretaires
 import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
-import ManageUsers from '@/components/Secretaries/ManageUsers.vue'
 import SecretaryPlanning from '@/components/Secretaries/SecretaryPlanning.vue'
 import ManagePatients from '@/components/Secretaries/ManagePatients.vue'
 import SecretaryBill from '@/components/Secretaries/SecretaryBill.vue'
-import NurseAgenda from '@/components/Nurses/NurseAgenda.vue'
 
 // composants pour infirmiers
 import NurseHome from '@/components/Nurses/NurseHome.vue'
+import NurseAgenda from '@/components/Nurses/NurseAgenda.vue'
+import NursesBills from '@/components/Nurses/NursesBills.vue'
+
+/// composants pour manager
+import ManagerHome from '@/components/Manager/ManagerHome.vue'
+import ManagerUsers from '@/components/Manager/ManagerUsers.vue'
+import ManagerTrainee from '@/components/Manager/ManagerTrainee.vue'
+import ManagerAgenda from '@/components/Manager/ManagerAgenda.vue'
 
 // routes globales //
 const routes: Array<RouteRecordRaw> = [
@@ -53,12 +58,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, requiresSecretary: true },
   },
   {
-    path: '/users',
-    name: 'ManageUsers',
-    component: ManageUsers,
-    meta: { requiresAuth: true, requiresSecretary: true },
-  },
-  {
     path: '/patients',
     name: 'ManagePatients',
     component: ManagePatients,
@@ -89,7 +88,34 @@ const routes: Array<RouteRecordRaw> = [
     name: 'NursesBills',
     component: NursesBills,
     meta: { requiresAuth: true, requiresNurse: true },
-  }
+  },
+
+
+  ///Routes pour Manager
+  {
+    path: '/MHome',
+    name: 'ManagerHome',
+    component: ManagerHome,
+    meta: { requiresAuth: true, requiresManager: true },
+  },
+  {
+    path: '/MUsers',
+    name: 'ManagerUsers',
+    component: ManagerUsers,
+    meta: { requiresAuth: true, requiresManager: true },
+  },
+  {
+    path: '/MTrainee',
+    name: 'ManagerTrainee',
+    component: ManagerTrainee,
+    meta: { requiresAuth: true, requiresManager: true },
+  },
+  {
+    path: '/MAgenda',
+    name: 'ManagerAgenda',
+    component: ManagerAgenda,
+    meta: { requiresAuth: true, requiresManager: true },
+  },
 ]
 
 const router = createRouter({

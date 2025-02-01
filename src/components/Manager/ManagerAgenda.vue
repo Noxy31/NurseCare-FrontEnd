@@ -24,12 +24,12 @@ interface AppointmentFormData {
   idUser: number
 }
 
-const secretaryNavItems = [
-  { name: 'Home', path: '/SHome', icon: 'Home' },
-  { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
-  { name: 'Bills', path: '/SBills', icon: 'Receipt' },
-  { name: 'Patients', path: '/patients', icon: 'Users' },
-  { name: 'Users', path: '/users', icon: 'UserCog' },
+const managerNavItems = [
+  { name: 'Overview', path: '/MHome', icon: 'Home' },
+  { name: 'Agenda', path: '/MAgenda', icon: 'Calendar' },
+  { name: 'Users', path: '/MUsers', icon: 'UserCog' },
+  { name: 'Trainee', path: '/MTrainee', icon: 'UserPen' },
+  // { name: 'Profile', path: '/NProfile', icon: 'UserCircle' },
 ]
 
 const showToast = ref(false)
@@ -201,8 +201,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <NavBar :navItems="secretaryNavItems" class="fixed z-50" />
+  <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
+    <NavBar :navItems="managerNavItems" class="fixed z-50" />
 
     <main class="flex-1 p-4 sm:ml-64 sm:p-6">
       <ToastNotification

@@ -6,25 +6,31 @@ import type { TableItem } from '../DataTab.vue'
 import DynamicForm from '../DynamicForm.vue'
 import type { FormField } from '../DynamicForm.vue'
 import ToastNotification from '../ToastNotification.vue'
-import { useRouter } from 'vue-router'
 
-interface Client {
-  idClient: number
-  clientName: string
-  clientAddress: string
-  clientPhone: string
-  clientMail: string
+interface Trainee {
+  idTrainee: number
+  traineeName: string
+  traineeFirstName: string
+  traineeSchool: string
+  traineeAvgGrade: number
 }
 
-interface CreateUserFormData {
-  clientName: string
-  clientMail: string
-  clientPhone: string
-  clientAddress: string
+interface CreateTraineeFormData {
+  traineeName: string
+  traineeFirstName: string
+  traineeSchool: string
+  traineeAvgGrade: number
 }
+
+const managerNavItems = [
+  { name: 'Overview', path: '/MHome', icon: 'Home' },
+  { name: 'Agenda', path: '/MAgenda', icon: 'Calendar' },
+  { name: 'Users', path: '/MUsers', icon: 'UserCog' },
+  { name: 'Trainee', path: '/MTrainee', icon: 'UserPen' },
+]
+
 const showForm = ref(false)
 const isLoading = ref(false)
-const router = useRouter()
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
@@ -35,153 +41,134 @@ const showNotification = (message: string, type: 'success' | 'error') => {
   showToast.value = true
 }
 
-const secretaryNavItems = [
-  { name: 'Home', path: '/SHome', icon: 'Home' },
-  { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
-  { name: 'Bills', path: '/SBills', icon: 'Receipt' },
-  { name: 'Patients', path: '/patients', icon: 'Users' },
-  { name: 'Users', path: '/users', icon: 'UserCog' },
-]
-
 const formFields: FormField[] = [
   {
-    name: 'clientName',
-    label: 'Patient Name',
+    name: 'traineeName',
+    label: 'Last Name',
     type: 'text',
-    placeholder: 'Enter the name of the patient ',
+    placeholder: 'Enter the trainee last name',
   },
   {
-    name: 'clientMail',
-    label: 'Patient E-mail',
-    type: 'email',
-    placeholder: 'Enter the e-mail address',
+    name: 'traineeFirstName',
+    label: 'First Name',
+    type: 'text',
+    placeholder: 'Enter the trainee first name',
   },
   {
-    name: 'clientPhone',
-    label: 'Patient Phone',
+    name: 'traineeSchool',
+    label: 'School',
     type: 'text',
-    placeholder: 'Enter the phone number',
-  },
-  {
-    name: 'clientAddress',
-    label: 'Patient Address',
-    type: 'text',
-    placeholder: 'Enter the address',
+    placeholder: 'Enter the school name',
   },
 ]
 
-const clients = ref<TableItem[]>([])
-const originalClients = ref<TableItem[]>([])
+const trainees = ref<TableItem[]>([])
+const originalTrainees = ref<TableItem[]>([])
 
-const fetchClients = async () => {
+const fetchTrainees = async () => {
   try {
-    const response = await fetch('/api/client/get-clients')
+    const response = await fetch('/api/trainee/get-trainees')
     if (!response.ok) {
-      throw new Error('Network response was not ok on fetching clients')
+      throw new Error('Network response was not ok')
     }
     const data = await response.json()
-    clients.value = data as TableItem[]
-    originalClients.value = JSON.parse(JSON.stringify(data)) as TableItem[]
-    console.log(clients.value)
+    trainees.value = data as TableItem[]
+    originalTrainees.value = JSON.parse(JSON.stringify(data)) as TableItem[]
+    console.log(trainees.value)
   } catch (error) {
-    console.error('Error fetching users:', error)
+    console.error('Error fetching trainees:', error)
   }
 }
 
-const handleDelete = async (idClient: number) => {
-  const confirmed = confirm('Are you sure that you want to delete this client?')
+const handleDelete = async (idTrainee: number) => {
+  const confirmed = confirm('Are you sure that you want to delete this trainee?')
   if (!confirmed) {
     return
   }
 
   try {
-    const response = await fetch('/api/client/delete-client', {
+    const response = await fetch('/api/trainee/delete-trainee', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ idClient }),
+      body: JSON.stringify({ idTrainee }),
     })
 
     if (!response.ok) {
-      showNotification('Failed to delete client', 'error')
-      throw new Error('Failed to delete client')
+      showNotification('Failed to delete trainee', 'error')
+      throw new Error('Failed to delete trainee')
     }
 
-    await fetchClients()
-    showNotification('Client deleted successfully', 'success')
+    await fetchTrainees()
+    showNotification('Trainee deleted successfully', 'success')
   } catch (error) {
-    console.error('Error deleting client:', error)
-    showNotification('Error occurred while deleting client', 'error')
+    console.error('Error deleting trainee:', error)
+    showNotification('Error occurred while deleting trainee', 'error')
   }
 }
 
 const handleUpdate = async (item: TableItem) => {
   try {
-    const updatedClient: Client = {
-      idClient: item.idClient as number,
-      clientName: item.clientName as string,
-      clientPhone: item.clientPhone as string,
-      clientMail: item.clientMail as string,
-      clientAddress: item.clientAddress as string,
+    const updatedTrainee: Trainee = {
+      idTrainee: item.idTrainee as number,
+      traineeName: item.traineeName as string,
+      traineeFirstName: item.traineeFirstName as string,
+      traineeSchool: item.traineeSchool as string,
+      traineeAvgGrade: item.traineeAvgGrade as number,
     }
 
-    const response = await fetch('/api/client/update-client', {
+    const response = await fetch('/api/trainee/update-trainee', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(updatedClient),
+      body: JSON.stringify(updatedTrainee),
     })
 
     if (!response.ok) {
-      showNotification('Failed to update client', 'error')
-      throw new Error('Failed to update client')
+      showNotification('Failed to update trainee', 'error')
+      throw new Error('Failed to update trainee')
     }
 
-    await fetchClients()
-    showNotification('Client updated successfully', 'success')
+    await fetchTrainees()
+    showNotification('Trainee updated successfully', 'success')
   } catch (error) {
-    console.error('Error updating client:', error)
-    showNotification('Error occurred while updating client', 'error')
+    console.error('Error updating trainee:', error)
+    showNotification('Error occurred while updating trainee', 'error')
   }
 }
 
 const handleCancel = () => {
-  clients.value = JSON.parse(JSON.stringify(originalClients.value))
+  trainees.value = JSON.parse(JSON.stringify(originalTrainees.value))
 }
 
-const handleSubmit = async (formData: CreateUserFormData) => {
-  if (isLoading.value) return // Protection contre les soumissions multiples
+const handleSubmit = async (formData: CreateTraineeFormData) => {
+  if (isLoading.value) return
 
   try {
-    isLoading.value = true // Active le flag de soumission
+    isLoading.value = true
 
-    const response = await fetch('/api/client/create-client', {
+    const response = await fetch('/api/trainee/create-trainee', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        clientName: formData.clientName,
-        clientMail: formData.clientMail,
-        clientPhone: formData.clientPhone,
-        clientAddress: formData.clientAddress,
-      }),
+      body: JSON.stringify(formData),
     })
 
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to create user')
+      throw new Error(errorData.message || 'Failed to create trainee')
     }
 
-    await fetchClients()
-    showNotification('Patient successfully created!', 'success')
+    await fetchTrainees()
+    showNotification('Trainee successfully created!', 'success')
     showForm.value = false
   } catch (error) {
-    console.error('Error creating patient:', error)
+    console.error('Error creating trainee:', error)
     showNotification(
-      error instanceof Error ? error.message : 'An error occurred while creating the patient',
+      error instanceof Error ? error.message : 'An error occurred while creating the trainee',
       'error'
     )
   } finally {
@@ -193,12 +180,12 @@ const toggleForm = () => {
   showForm.value = !showForm.value
 }
 
-onMounted(fetchClients)
+onMounted(fetchTrainees)
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
-    <NavBar :navItems="secretaryNavItems" class="fixed z-50" />
+  <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
+    <NavBar :navItems="managerNavItems" class="fixed z-50" />
 
     <main class="flex-1 w-full min-w-0 p-4 sm:ml-64 sm:p-6">
       <ToastNotification
@@ -211,10 +198,8 @@ onMounted(fetchClients)
       <div
         class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
       >
-        <div class="flex items-center gap-4 mb-6 sm:mb-8">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">
-            Patient Management
-          </h1>
+        <div class="flex items-center gap-4 mb-8">
+          <h1 class="text-3xl md:text-4xl font-medium text-sky-900">Trainee Management</h1>
         </div>
 
         <div class="mb-12 flex flex-col items-center">
@@ -222,24 +207,23 @@ onMounted(fetchClients)
             @click="toggleForm"
             class="bg-sky-900/20 hover:bg-sky-900/30 text-sky-900 text-lg font-medium py-4 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-3 hover:scale-105"
           >
-            <span>Create New Patient</span>
+            <span>Create New Trainee</span>
           </button>
         </div>
 
-        <div>
-          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Patient List</h2>
+        <div class="mb-8">
+          <h2 class="text-2xl md:text-3xl font-medium text-sky-900 mb-4">Trainee List</h2>
           <div class="overflow-x-auto min-w-0">
             <DataTable
               :headers="[
-                { actual: 'idClient', display: 'ID' },
-                { actual: 'clientName', display: 'Name' },
-                { actual: 'clientPhone', display: 'Phone' },
-                { actual: 'clientMail', display: 'Email' },
-                { actual: 'clientAddress', display: 'Address' },
+                { actual: 'idTrainee', display: 'ID' },
+                { actual: 'traineeName', display: 'Last Name' },
+                { actual: 'traineeFirstName', display: 'First Name' },
+                { actual: 'traineeSchool', display: 'School' },
+                { actual: 'traineeAvgGrade', display: 'Average Grade' },
               ]"
-              :items="clients"
-              rowKey="idClient"
-              :read-only="false"
+              :items="trainees"
+              rowKey="idTrainee"
               @delete="handleDelete"
               @update="handleUpdate"
               @cancel="handleCancel"
@@ -284,7 +268,7 @@ onMounted(fetchClients)
           >
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">
-                Create New Patient
+                Create New Trainee
               </h2>
               <button
                 @click="showForm = false"
@@ -309,7 +293,7 @@ onMounted(fetchClients)
 
             <DynamicForm
               :fields="formFields"
-              submitLabel="Create Patient"
+              submitLabel="Create Trainee"
               @submit="handleSubmit"
               @validation-error="
                 showNotification('Please fill in all required fields correctly.', 'error')
@@ -332,7 +316,7 @@ onMounted(fetchClients)
                     :disabled="isLoading"
                   >
                     <span v-if="isLoading">Creating...</span>
-                    <span v-else>Create Patient</span>
+                    <span v-else>Create Trainee</span>
                   </button>
                 </div>
               </template>

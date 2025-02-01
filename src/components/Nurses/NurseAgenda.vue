@@ -33,7 +33,7 @@ const nurseNavItems = [
   { name: 'Home', path: '/NHome', icon: 'Home' },
   { name: 'Agenda', path: '/NAgenda', icon: 'Calendar' },
   { name: 'Bills', path: '/NBills', icon: 'FileText' },
-  { name: 'Profile', path: '/NProfile', icon: 'UserCircle' },
+  // { name: 'Profile', path: '/NProfile', icon: 'UserCircle' },
 ]
 
 const fetchUserName = async () => {
