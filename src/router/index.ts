@@ -6,7 +6,6 @@ import AccessDenied from '@/components/AccessDenied.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 
 // composants pour secretaires
-import SecretaryHome from '@/components/Secretaries/SecretaryHome.vue'
 import SecretaryPlanning from '@/components/Secretaries/SecretaryPlanning.vue'
 import ManagePatients from '@/components/Secretaries/ManagePatients.vue'
 import SecretaryBill from '@/components/Secretaries/SecretaryBill.vue'
@@ -45,12 +44,6 @@ const routes: Array<RouteRecordRaw> = [
   },
 
   // Routes pour Secretaires //
-  {
-    path: '/SHome',
-    name: 'SecretaryHome',
-    component: SecretaryHome,
-    meta: { requiresAuth: true, requiresSecretary: true },
-  },
   {
     path: '/SPlanning',
     name: 'SecretaryPlanning',

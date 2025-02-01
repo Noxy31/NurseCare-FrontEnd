@@ -25,13 +25,12 @@ interface AppointmentFormData {
 }
 
 const secretaryNavItems = [
-  { name: 'Home', path: '/SHome', icon: 'Home' },
   { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
   { name: 'Bills', path: '/SBills', icon: 'Receipt' },
   { name: 'Patients', path: '/patients', icon: 'Users' },
-  { name: 'Users', path: '/users', icon: 'UserCog' },
 ]
 
+const userName = ref<string | null>(null)
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
@@ -75,6 +74,21 @@ const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
   toastType.value = type
   showToast.value = true
+}
+
+const fetchUserName = async () => {
+  try {
+    const response = await fetch('/api/users/me', {
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data')
+    }
+    const data = await response.json()
+    userName.value = data.name
+  } catch (error) {
+    console.error('Error fetching user data:', error)
+  }
 }
 
 const fetchEvents = async () => {
@@ -195,6 +209,7 @@ const handleNewEventClick = () => {
 }
 
 onMounted(() => {
+  fetchUserName()
   fetchEvents()
   fetchSuggestions()
 })
@@ -215,6 +230,13 @@ onMounted(() => {
       <div
         class="bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
       >
+      <div class="flex items-center mb-8">
+        <p class="text-xl text-sky-900 font-poppins">
+          Welcome back
+          <span class="font-medium">{{ userName || 'Loading...' }},</span>
+          have a nice day !
+        </p>
+      </div>
         <div class="flex items-center gap-4 mb-6 sm:mb-8">
           <h1 class="text-2xl sm:text-3xl lg:text-4xl font-medium text-sky-900">
             Planning Management

@@ -36,11 +36,9 @@ const showNotification = (message: string, type: 'success' | 'error') => {
 }
 
 const secretaryNavItems = [
-  { name: 'Home', path: '/SHome', icon: 'Home' },
   { name: 'Planning', path: '/SPlanning', icon: 'Calendar' },
   { name: 'Bills', path: '/SBills', icon: 'Receipt' },
   { name: 'Patients', path: '/patients', icon: 'Users' },
-  { name: 'Users', path: '/users', icon: 'UserCog' },
 ]
 
 const formFields: FormField[] = [

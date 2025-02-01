@@ -71,7 +71,7 @@ const handleLogin = async (formData: Record<string, string>) => {
         redirectPath = '/MHome'
         break
       case "secretary":
-        redirectPath = '/SHome'
+        redirectPath = '/SPlanning'
         break
       case "nurse":
         redirectPath = '/NHome'
