@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import type { Map as LeafletMap, LatLngExpression, Marker, Polyline } from 'leaflet'
-import { generateInvoice } from '@/services/InvoiceService';
+import { generateInvoice } from '@/services/InvoiceService'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Toast from './ToastNotification.vue'
@@ -30,9 +30,9 @@ interface Trainee {
 }
 
 interface Appointment {
-  idApp: number;
-  clientAddress: string;
-  clientName: string;
+  idApp: number
+  clientAddress: string
+  clientName: string
 }
 
 const props = defineProps<{
@@ -76,6 +76,17 @@ const endIcon = L.icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
+})
+
+
+interface TraineeData {
+  grade: number | null
+  comment: string
+}
+
+const traineeData = ref<TraineeData>({
+  grade: null,
+  comment: ''
 })
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -211,7 +222,9 @@ const initMap = () => {
 const addPerformance = () => {
   if (!selectedPerformance.value) return
 
-  const performanceToAdd = performances.value.find((p: Performance) => p.idPerf === selectedPerformance.value)
+  const performanceToAdd = performances.value.find(
+    (p: Performance) => p.idPerf === selectedPerformance.value
+  )
   if (performanceToAdd) {
     selectedPerformances.value.push({
       ...performanceToAdd,
@@ -291,72 +304,82 @@ const checkTraineePresence = async () => {
 }
 
 const saveAppointmentDetails = async () => {
- if (!props.appointment?.idApp || selectedPerformances.value.length === 0 || !lastLocation.value) {
-   toastMessage.value = 'Data missing'
-   toastType.value = 'error'
-   showToast.value = true
-   return
- }
+  if (!props.appointment?.idApp || selectedPerformances.value.length === 0 || !lastLocation.value) {
+    toastMessage.value = 'Data missing'
+    toastType.value = 'error'
+    showToast.value = true
+    return
+  }
 
- if (isSaving.value) return
- isSaving.value = true
+  if (hasTrainee.value && (!traineeData.value.grade || traineeData.value.grade < 0 || traineeData.value.grade > 20)) {
+    toastMessage.value = 'Please enter a valid grade (0-20)'
+    toastType.value = 'error'
+    showToast.value = true
+    return
+  }
 
- try {
-   const response = await fetch('/api/perf/save-appointment', {
-     method: 'POST',
-     headers: {
-       'Content-Type': 'application/json',
-     },
-     credentials: 'include',
-     body: JSON.stringify({
-       idApp: props.appointment.idApp,
-       performances: selectedPerformances.value.map((perf: Performance) => ({
-         idPerf: perf.idPerf,
-         perfPrice: perf.perfPrice
-       })),
-       hasTrainee: hasTrainee.value,
-       idTrainee: hasTrainee.value ? selectedTrainee.value : null,
-       coordinates: lastLocation.value,
-     }),
-   });
+  if (isSaving.value) return
+  isSaving.value = true
 
-   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-   const responseData = await response.json();
+  try {
+    const response = await fetch('/api/perf/save-appointment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        idApp: props.appointment.idApp,
+        performances: selectedPerformances.value.map((perf: Performance) => ({
+          idPerf: perf.idPerf,
+          perfPrice: perf.perfPrice
+        })),
+        hasTrainee: hasTrainee.value,
+        idTrainee: hasTrainee.value ? selectedTrainee.value : null,
+        traineeGrade: hasTrainee.value ? traineeData.value.grade : null,
+        traineeComment: hasTrainee.value ? traineeData.value.comment : null,
+        coordinates: lastLocation.value,
+      }),
+    })
 
-   // Calculer le total
-   const total = selectedPerformances.value.reduce((sum, perf) => sum + perf.perfPrice, 0);
 
-   // Générer la facture
-   const { doc, date } = generateInvoice(
-     responseData.idBill,
-     {
-       clientName: props.appointment.clientName || 'Non renseigné',
-       clientAddress: props.appointment.clientAddress
-     },
-     selectedPerformances.value
-   );
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const responseData = await response.json()
 
-   // Télécharger le PDF avec la date et l'id
-   const fileName = `facture_${date}-${responseData.idBill}.pdf`;
-   doc.save(fileName);
+    // Calculer le total
+    const total = selectedPerformances.value.reduce((sum, perf) => sum + perf.perfPrice, 0)
 
-   // Ouvrir dans un nouvel onglet
-  //  const pdfDataUri = doc.output('datauristring');
-  //  window.open(pdfDataUri);
+    // Générer la facture
+    const { doc, date } = generateInvoice(
+      responseData.idBill,
+      {
+        clientName: props.appointment.clientName || 'Non renseigné',
+        clientAddress: props.appointment.clientAddress,
+      },
+      selectedPerformances.value
+    )
 
-   toastMessage.value = 'Appointment details saved'
-   toastType.value = 'success'
-   showToast.value = true
-   emit('update')
-   emit('close')
- } catch (error) {
-   console.error('Error saving appointment details:', error)
-   toastMessage.value = "Error saving appointment details"
-   toastType.value = 'error'
-   showToast.value = true
- } finally {
-   isSaving.value = false
- }
+    // Télécharger le PDF avec la date et l'id
+    const fileName = `facture_${date}-${responseData.idBill}.pdf`
+    doc.save(fileName)
+
+    // Ouvrir dans un nouvel onglet
+    //  const pdfDataUri = doc.output('datauristring');
+    //  window.open(pdfDataUri);
+
+    toastMessage.value = 'Appointment details saved'
+    toastType.value = 'success'
+    showToast.value = true
+    emit('update')
+    emit('close')
+  } catch (error) {
+    console.error('Error saving appointment details:', error)
+    toastMessage.value = 'Error saving appointment details'
+    toastType.value = 'error'
+    showToast.value = true
+  } finally {
+    isSaving.value = false
+  }
 }
 
 // Lifecycle hooks et watchers
@@ -397,6 +420,16 @@ watch(
     }
   }
 )
+
+watch(hasTrainee, (newValue) => {
+  if (!newValue) {
+    traineeData.value = {
+      grade: null,
+      comment: ''
+    }
+    selectedTrainee.value = null
+  }
+})
 
 watch(
   () => selectedCategory.value,
@@ -490,15 +523,43 @@ watch(
         <div class="mb-6">
           <label class="flex items-center mb-2">
             <input type="checkbox" v-model="hasTrainee" class="mr-2" />
-            Stagiaire présent
+            Trainee present
           </label>
 
-          <select v-if="hasTrainee" v-model="selectedTrainee" class="w-full p-2 border rounded">
-            <option :value="null">Sélectionner un stagiaire</option>
-            <option v-for="trainee in trainees" :key="trainee.idTrainee" :value="trainee.idTrainee">
-              {{ trainee.traineeName }} {{ trainee.traineeFirstName }}
-            </option>
-          </select>
+          <div v-if="hasTrainee" class="space-y-4">
+            <select v-model="selectedTrainee" class="w-full p-2 border rounded">
+              <option :value="null">Select a trainee</option>
+              <option
+                v-for="trainee in trainees"
+                :key="trainee.idTrainee"
+                :value="trainee.idTrainee"
+              >
+                {{ trainee.traineeName }} {{ trainee.traineeFirstName }}
+              </option>
+            </select>
+
+            <div>
+              <label class="block mb-2">Grade (0-20)</label>
+              <input
+                type="number"
+                v-model="traineeData.grade"
+                min="0"
+                max="20"
+                step="0.5"
+                class="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div>
+              <label class="block mb-2">Comment</label>
+              <textarea
+                v-model="traineeData.comment"
+                rows="3"
+                class="w-full p-2 border rounded"
+                placeholder="Enter your comment about the trainee..."
+              ></textarea>
+            </div>
+          </div>
         </div>
 
         <div class="flex justify-end gap-4">

@@ -265,6 +265,7 @@ onMounted(fetchUsers)
                 },
               ]"
               :read-only="false"
+              :editableFields="['userName', 'userMail', 'userRole']"
               @delete="handleDelete"
               @update="handleUpdate"
               @cancel="handleCancel"

@@ -238,6 +238,7 @@ onMounted(fetchClients)
               :items="clients"
               rowKey="idClient"
               :read-only="false"
+              :editableFields="['clientName', 'clientPhone', 'clientMail', 'clientAddress']"
               @delete="handleDelete"
               @update="handleUpdate"
               @cancel="handleCancel"

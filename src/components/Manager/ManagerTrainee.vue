@@ -224,6 +224,8 @@ onMounted(fetchTrainees)
               ]"
               :items="trainees"
               rowKey="idTrainee"
+              :read-only="false"
+              :editableFields="['traineeName', 'traineeFirstName', 'traineeSchool']"
               @delete="handleDelete"
               @update="handleUpdate"
               @cancel="handleCancel"
