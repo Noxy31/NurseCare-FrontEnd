@@ -49,13 +49,28 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref<string>('')
+const currentPage = ref(1)
+const itemsPerPage = 10
 
+// Tri par défaut des éléments par ID
+const sortedItems = computed(() => {
+  return [...props.items].sort((a, b) => {
+    const aValue = a[props.rowKey]
+    const bValue = b[props.rowKey]
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return aValue - bValue
+    }
+    return 0
+  })
+})
+
+// Filtrage des éléments
 const filteredItems = computed(() => {
   if (!searchQuery.value) {
-    return props.items
+    return sortedItems.value
   }
 
-  return props.items.filter((item) => {
+  return sortedItems.value.filter((item) => {
     return Object.values(item).some((value) => {
       if (typeof value === 'string') {
         return value.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -64,6 +79,37 @@ const filteredItems = computed(() => {
     })
   })
 })
+
+// Pagination des éléments
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredItems.value.slice(start, end)
+})
+
+// Nombre total de pages
+const totalPages = computed(() => {
+  return Math.ceil(filteredItems.value.length / itemsPerPage)
+})
+
+// Navigation entre les pages
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const previousPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
 
 const isValidNumber = (value: unknown): value is number => {
   return typeof value === 'number' && !isNaN(value)
@@ -134,7 +180,6 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
   <div
     class="bg-sky-900/20 backdrop-blur-md p-4 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-sky-700/20"
   >
-    <!-- Search input reste inchangé -->
     <div class="flex justify-end mb-4">
       <input
         v-model="searchQuery"
@@ -143,7 +188,7 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
         class="p-2 border border-sky-700/30 rounded-lg w-1/2 md:w-1/4 bg-sky-900/10 backdrop-blur-sm text-sky-900 placeholder-slate-500 focus:outline-none focus:border-sky-600/60 focus:ring-2 focus:ring-sky-600/20 transition-colors"
       />
     </div>
-    <!-- Table avec nouvelles classes -->
+
     <div class="overflow-x-auto md:overflow-hidden">
       <table class="min-w-full divide-y divide-sky-700/20 text-xs md:text-sm">
         <thead class="bg-sky-900/30 text-sky-900">
@@ -163,7 +208,7 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
         </thead>
         <TransitionGroup tag="tbody" class="divide-y divide-sky-700/20" name="list" appear>
           <tr
-            v-for="(item, index) in filteredItems"
+            v-for="(item, index) in paginatedItems"
             :key="item[rowKey]?.toString() || index"
             @click="handleRowClick(item)"
             :class="{
@@ -242,7 +287,6 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
                     <template v-if="isCheckable">
                       <span class="text-sky-900 text-xs md:text-sm">Select</span>
                     </template>
-                    <!-- Modifiez cette partie pour n'afficher les boutons que si !readOnly -->
                     <template v-else-if="!readOnly">
                       <div class="flex gap-1 md:gap-2">
                         <button
@@ -266,6 +310,34 @@ const deleteItem = (item: TableItem, event: MouseEvent) => {
           </tr>
         </TransitionGroup>
       </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-4 flex justify-between items-center">
+      <div class="text-sm text-sky-900">
+        Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredItems.length) }} of {{ filteredItems.length }} entries
+      </div>
+      <div class="flex gap-2">
+        <button
+          @click="previousPage"
+          :disabled="currentPage === 1"
+          class="px-3 py-1 rounded-lg bg-sky-700/40 text-sky-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-700/60 transition-colors"
+        >
+          ←
+        </button>
+        <span
+          class="px-3 py-1 rounded-lg bg-sky-700/60 text-white"
+        >
+          {{ currentPage }}
+        </span>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-1 rounded-lg bg-sky-700/40 text-sky-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-700/60 transition-colors"
+        >
+          →
+        </button>
+      </div>
     </div>
   </div>
 </template>
