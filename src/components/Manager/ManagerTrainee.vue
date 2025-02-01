@@ -6,6 +6,7 @@ import type { TableItem } from '../DataTab.vue'
 import DynamicForm from '../DynamicForm.vue'
 import type { FormField } from '../DynamicForm.vue'
 import ToastNotification from '../ToastNotification.vue'
+import TraineeModal from '@/components/TraineeModal.vue'
 
 interface Trainee {
   idTrainee: number
@@ -34,6 +35,8 @@ const isLoading = ref(false)
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
+const selectedTrainee = ref<TableItem | null>(null)
+const showRatingsModal = ref(false)
 
 const showNotification = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
@@ -143,6 +146,16 @@ const handleCancel = () => {
   trainees.value = JSON.parse(JSON.stringify(originalTrainees.value))
 }
 
+const handleRowClick = (item: TableItem) => {
+  selectedTrainee.value = item
+  showRatingsModal.value = true
+}
+
+const closeRatingsModal = () => {
+  showRatingsModal.value = false
+  selectedTrainee.value = null
+}
+
 const handleSubmit = async (formData: CreateTraineeFormData) => {
   if (isLoading.value) return
 
@@ -184,7 +197,9 @@ onMounted(fetchTrainees)
 </script>
 
 <template>
-  <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
+  <div
+    class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50"
+  >
     <NavBar :navItems="managerNavItems" class="fixed z-50" />
 
     <main class="flex-1 w-full min-w-0 p-4 sm:ml-64 sm:p-6">
@@ -225,10 +240,12 @@ onMounted(fetchTrainees)
               :items="trainees"
               rowKey="idTrainee"
               :read-only="false"
+              :isClickable="true"
               :editableFields="['traineeName', 'traineeFirstName', 'traineeSchool']"
               @delete="handleDelete"
               @update="handleUpdate"
               @cancel="handleCancel"
+              @row-click="handleRowClick"
               class="w-full"
             />
           </div>
@@ -326,6 +343,11 @@ onMounted(fetchTrainees)
           </div>
         </div>
       </transition>
+      <TraineeModal
+          :trainee="selectedTrainee"
+          :isOpen="showRatingsModal"
+          @close="closeRatingsModal"
+        />
     </main>
   </div>
 </template>
