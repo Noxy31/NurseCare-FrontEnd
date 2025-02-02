@@ -95,29 +95,23 @@ const handleLogin = async (formData: Record<string, string>) => {
 </script>
 
 <template>
-  <div class="relative flex flex-col min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50 p-4">
-    <ToastNotification
-      v-if="showToast"
-      :message="toastMessage"
-      :type="toastType"
-      @close="showToast = false"
-    />
+  <div class="relative min-h-screen overflow-hidden bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
+    <div class="flex flex-col items-center justify-center min-h-screen gap-16">
+      <!-- Logo et titre -->
+      <div class="flex items-center">
+        <img
+          src="@/assets/logo/NurseCare-Logo.png"
+          alt="Nurse Care Logo"
+          class="h-12 md:h-24 w-auto drop-shadow-md shrink-0"
+        />
+        <h1 class="text-3xl md:text-8xl font-Octarine bg-gradient-to-r from-sky-400 via-sky-500 to-blue-400 text-transparent bg-clip-text drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]">
+          NurseCare
+        </h1>
+      </div>
 
-    <div class="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
-      <img
-        src="@/assets/logo/NurseCare-Logo.png"
-        alt="Nurse Care Logo"
-        class="h-24 w-auto drop-shadow-md"
-      />
-      <h1 class="text-6xl md:text-8xl font-Octarine whitespace-nowrap bg-gradient-to-r from-sky-400 via-sky-500 to-blue-400 text-transparent bg-clip-text drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)] px-1">
-        Nurse Care
-      </h1>
-    </div>
-
-    <div class="flex items-center justify-center w-full h-full pt-48">
-      <div class="bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 w-full max-w-sm border border-white/40">
+      <!-- Formulaire -->
+      <div class="bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 w-full max-w-sm mx-4 border border-white/40">
         <h2 class="text-xl md:text-2xl font-medium font-poppins text-sky-900 text-center mb-8">Welcome</h2>
-
         <DynamicForm
           :fields="loginFields"
           submitLabel="Login"
@@ -126,5 +120,12 @@ const handleLogin = async (formData: Record<string, string>) => {
         />
       </div>
     </div>
+
+    <ToastNotification
+      v-if="showToast"
+      :message="toastMessage"
+      :type="toastType"
+      @close="showToast = false"
+    />
   </div>
 </template>
