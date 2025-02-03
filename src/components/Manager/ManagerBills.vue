@@ -168,7 +168,7 @@ const handleCancel = (item: TableItem) => {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-sky-50">
+  <div class="relative flex min-h-screen bg-gradient-to-br from-indigo-200 via-purple-100 to-indigo-50">
     <NavBar :navItems="managerNavItems" class="fixed z-50" />
 
     <main class="flex-1 w-full min-w-0 p-4 sm:ml-64 sm:p-6">
