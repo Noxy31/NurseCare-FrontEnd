@@ -106,10 +106,9 @@ onMounted(() => {
 
     <main class="flex-1 p-4 sm:ml-64 sm:p-6">
       <div class="mb-8">
-        <p class="text-xl text-indigo-900">
-          Welcome back
-          <span class="font-medium">{{ userName || 'Loading...' }}</span>
-        </p>
+        <h1 class="text-2xl text-indigo-900">
+          Your Agenda
+        </h1>
       </div>
 
       <div

@@ -40,7 +40,7 @@ onMounted(() => {
       <div class="mb-8">
         <p class="text-xl text-indigo-900">
           Welcome back
-          <span class="font-medium">{{ userName || 'Loading...' }}</span>
+          <span class="font-medium">{{ userName || 'Loading...' }}, have a nice day !</span>
         </p>
       </div>
 
