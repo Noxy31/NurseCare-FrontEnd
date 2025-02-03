@@ -60,7 +60,6 @@ const dateMapping = computed(() => ({
   }, {} as Record<string, string>)
 }))
 
-// Fetch bills
 const fetchBills = async () => {
   try {
     const response = await fetch('/api/bill/get-all-bills', {
@@ -78,7 +77,6 @@ const fetchBills = async () => {
 
 onMounted(fetchBills)
 
-// Handle bill deletion
 const handleDelete = async (id: number) => {
   const confirmed = confirm('Are you sure that you want to delete this bill?')
   if (!confirmed) {
@@ -102,7 +100,6 @@ const handleDelete = async (id: number) => {
   }
 }
 
-// Handle bill update
 const handleUpdate = async (item: TableItem) => {
   const bill = item as Bill
   try {
@@ -120,7 +117,7 @@ const handleUpdate = async (item: TableItem) => {
     })
 
     if (response.ok) {
-      await fetchBills() // Refresh the bills list
+      await fetchBills()
       showNotification('Bill successfully updated', 'success')
     } else {
       showNotification('Error updating bill', 'error')
@@ -154,10 +151,8 @@ const getStatusDisplay = (status: BillStatus): string => {
   return statusMapping.values[status]
 }
 
-// Ajout de la gestion de l'annulation
 const originalBills = ref<Bill[]>([])
 
-// Mise à jour de fetchBills pour sauvegarder l'état original
 
 const handleCancel = (item: TableItem) => {
   const originalBill = originalBills.value.find((bill) => bill.idBill === item.idBill)
