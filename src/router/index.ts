@@ -20,6 +20,7 @@ import ManagerHome from '@/components/Manager/ManagerHome.vue'
 import ManagerUsers from '@/components/Manager/ManagerUsers.vue'
 import ManagerTrainee from '@/components/Manager/ManagerTrainee.vue'
 import ManagerAgenda from '@/components/Manager/ManagerAgenda.vue'
+import ManagerBills from '@/components/Manager/ManagerBills.vue'
 
 // routes globales //
 const routes: Array<RouteRecordRaw> = [
@@ -107,6 +108,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/MAgenda',
     name: 'ManagerAgenda',
     component: ManagerAgenda,
+    meta: { requiresAuth: true, requiresManager: true },
+  },
+  {
+    path: '/MBills',
+    name: 'ManagerBills',
+    component: ManagerBills,
     meta: { requiresAuth: true, requiresManager: true },
   },
 ]

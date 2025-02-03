@@ -6,11 +6,12 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const userName = ref<string | null>(null)
-const managerNavItems = [
+  const managerNavItems = [
   { name: 'Overview', path: '/MHome', icon: 'Home' },
   { name: 'Agenda', path: '/MAgenda', icon: 'Calendar' },
   { name: 'Users', path: '/MUsers', icon: 'UserCog' },
   { name: 'Trainee', path: '/MTrainee', icon: 'UserPen' },
+  { name: 'Bills', path: '/MBills', icon: 'FileText' },
 ]
 
 const fetchUserName = async () => {

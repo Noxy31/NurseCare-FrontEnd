@@ -28,6 +28,7 @@ const managerNavItems = [
   { name: 'Agenda', path: '/MAgenda', icon: 'Calendar' },
   { name: 'Users', path: '/MUsers', icon: 'UserCog' },
   { name: 'Trainee', path: '/MTrainee', icon: 'UserPen' },
+  { name: 'Bills', path: '/MBills', icon: 'FileText' },
 ]
 
 const showForm = ref(false)
