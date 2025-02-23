@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import successSound from '@/assets/sounds/success.mp3';
-import failSound from '@/assets/sounds/fail.mp3';
 
 interface ToastProps {
   message: string;
@@ -19,25 +17,15 @@ const props = withDefaults(defineProps<ToastProps>(), {
 
 const shouldRender = ref(true);
 const isVisible = ref(false);
-
 let timer: number;
 let hideTimer: number;
 
 onMounted(() => {
-  const audio = new Audio(
-    props.type === 'success'
-      ? successSound
-      : failSound
-  );
-  audio.play().catch(() => {});
-
   requestAnimationFrame(() => {
     isVisible.value = true;
   });
-
   timer = setTimeout(() => {
     isVisible.value = false;
-
     hideTimer = setTimeout(() => {
       shouldRender.value = false;
       props.onClose();
