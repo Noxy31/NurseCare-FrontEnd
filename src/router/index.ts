@@ -123,29 +123,31 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
-  const token = Cookies.get('token')
-  const isAuthenticated = token !== undefined
-  let userRole: string | null = null
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    try {
+      const response = await fetch('/api/users/me')
+      if (response.ok) {
+        const userData = await response.json()
+        const userRole = userData.role
 
-  if (token) {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    userRole = payload.role
-  }
+        if (to.matched.some((record) => record.meta.requiresManager) && userRole !== 'manager') {
+          return next({ name: 'AccessDenied' })
+        }
+        if (to.matched.some((record) => record.meta.requiresSecretary) && userRole !== 'secretary') {
+          return next({ name: 'AccessDenied' })
+        }
+        if (to.matched.some((record) => record.meta.requiresNurse) && userRole !== 'nurse') {
+          return next({ name: 'AccessDenied' })
+        }
 
-  if (to.matched.some((record) => record.meta.requiresAuth) && !isAuthenticated) {
-    return next({ name: 'login' })
-  }
-
-  if (userRole !== null) {
-    if (to.matched.some((record) => record.meta.requiresManager) && userRole !== 'manager') {
-      return next({ name: 'AccessDenied' })
-    }
-    if (to.matched.some((record) => record.meta.requiresSecretary) && userRole !== 'secretary') {
-      return next({ name: 'AccessDenied' })
-    }
-    if (to.matched.some((record) => record.meta.requiresNurse) && userRole !== 'nurse') {
-      return next({ name: 'AccessDenied' })
+        return next()
+      } else {
+        return next({ name: 'login' })
+      }
+    } catch (error) {
+      console.error('Auth check error:', error)
+      return next({ name: 'login' })
     }
   }
 

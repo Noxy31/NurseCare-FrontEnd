@@ -9,8 +9,6 @@ import '@/assets/logo/NurseCare-Logo.png'
 
 const loading = ref(false)
 const router = useRouter()
-
-
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
@@ -61,11 +59,14 @@ const handleLogin = async (formData: Record<string, string>) => {
 
     const data = await response.json()
     console.log('Login successful:', data)
+
+    Cookies.set('token', data.token, { expires: 1 })
+
     showNotification('Login successful! Redirecting...', 'success')
 
     const userRole = data.user.role
-
     let redirectPath
+
     switch (userRole) {
       case 'manager':
         redirectPath = '/MHome'
@@ -85,7 +86,6 @@ const handleLogin = async (formData: Record<string, string>) => {
     setTimeout(() => {
       router.push(redirectPath)
     }, 1000)
-
   } catch (error) {
     console.error('Error during login:', error)
   } finally {
@@ -108,7 +108,6 @@ const handleLogin = async (formData: Record<string, string>) => {
           NurseCare
         </h1>
       </div>
-
       <!-- Formulaire -->
       <div class="bg-white/30 backdrop-blur-md p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 w-full max-w-sm mx-4 border border-white/40">
         <h2 class="text-xl md:text-2xl font-medium font-poppins text-sky-900 text-center mb-8">Welcome</h2>
@@ -120,7 +119,6 @@ const handleLogin = async (formData: Record<string, string>) => {
         />
       </div>
     </div>
-
     <ToastNotification
       v-if="showToast"
       :message="toastMessage"
