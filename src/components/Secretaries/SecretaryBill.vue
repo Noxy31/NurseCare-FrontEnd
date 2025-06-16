@@ -152,10 +152,7 @@ const getStatusDisplay = (status: BillStatus): string => {
   return statusMapping.values[status]
 }
 
-// Ajout de la gestion de l'annulation
 const originalBills = ref<Bill[]>([])
-
-// Mise à jour de fetchBills pour sauvegarder l'état original
 
 const handleCancel = (item: TableItem) => {
   const originalBill = originalBills.value.find((bill) => bill.idBill === item.idBill)
@@ -181,18 +178,18 @@ const handleCancel = (item: TableItem) => {
         class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
       >
         <div>
-          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Liste des factures</h2>
+          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Bills List</h2>
           <p class="text-sm text-sky-900/70 italic mb-4">
-            *Le status of a bill must be : pending, accepted or paid only.
+            *The status of a bill must be : pending, accepted or paid only.
           </p>
           <div class="overflow-x-auto min-w-0">
             <DataTable
               :headers="[
-                { actual: 'idBill', display: 'N° Facture' },
-                { actual: 'billStatus', display: 'Statut' },
-                { actual: 'totalAmount', display: 'Montant' },
+                { actual: 'idBill', display: 'N° Bill' },
+                { actual: 'billStatus', display: 'Status' },
+                { actual: 'totalAmount', display: 'Amount' },
                 { actual: 'clientName', display: 'Patient' },
-                { actual: 'appDate', display: 'Date RDV' },
+                { actual: 'appDate', display: 'Appointment date' },
               ]"
               :items="bills"
               rowKey="idBill"

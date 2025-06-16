@@ -74,7 +74,7 @@ const billChartData = ref<ChartData<'pie'>>({
 const categoryChartData = ref<ChartData<'bar'>>({
   labels: [],
   datasets: [{
-    label: 'Revenue par catégorie',
+    label: 'Revenue by Category',
     data: [],
     backgroundColor: '#6366F1',
     borderColor: '#4F46E5',
@@ -231,7 +231,7 @@ onMounted(() => {
     </div>
 
     <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
-      <h2 class="text-xl font-semibold mb-4 text-gray-800">Revenue par Catégorie</h2>
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Revenue by Category</h2>
       <div class="flex-grow">
         <div v-if="loading" class="h-64 flex items-center justify-center">
           <div class="text-gray-500">Loading...</div>
@@ -246,7 +246,7 @@ onMounted(() => {
             :options="barChartOptions"
           />
           <div v-else class="h-full flex items-center justify-center text-gray-500">
-            Aucune donnée disponible
+            No data available
           </div>
         </div>
       </div>

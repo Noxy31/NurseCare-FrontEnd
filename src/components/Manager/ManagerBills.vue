@@ -133,7 +133,7 @@ const handleRowClick = (item: TableItem) => {
 }
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('fr-FR')
+  return new Date(date).toLocaleDateString('en-US')
 }
 
 const formatTime = (time: string) => {
@@ -141,7 +141,7 @@ const formatTime = (time: string) => {
 }
 
 const formatAmount = (amount: number) => {
-  return new Intl.NumberFormat('fr-FR', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'EUR',
   }).format(amount)
@@ -178,18 +178,18 @@ const handleCancel = (item: TableItem) => {
         class="min-w-0 bg-white/30 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] transition-shadow duration-300 border border-white/40"
       >
         <div>
-          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Liste des factures</h2>
+          <h2 class="text-xl sm:text-2xl font-medium text-sky-900 mb-4">Bills List</h2>
           <p class="text-sm text-sky-900/70 italic mb-4">
-            *Le status of a bill must be : pending, accepted or paid only.
+            *The status of a bill must be: pending, accepted or paid only.
           </p>
           <div class="overflow-x-auto min-w-0">
             <DataTable
               :headers="[
-                { actual: 'idBill', display: 'N° Facture' },
-                { actual: 'billStatus', display: 'Statut' },
-                { actual: 'totalAmount', display: 'Montant' },
+                { actual: 'idBill', display: 'Bill N°' },
+                { actual: 'billStatus', display: 'Status' },
+                { actual: 'totalAmount', display: 'Amount' },
                 { actual: 'clientName', display: 'Patient' },
-                { actual: 'appDate', display: 'Date RDV' },
+                { actual: 'appDate', display: 'Appointment Date' },
               ]"
               :items="bills"
               rowKey="idBill"
@@ -239,7 +239,7 @@ const handleCancel = (item: TableItem) => {
           >
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium text-sky-900">
-                Détails de la facture #{{ selectedBill.idBill }}
+                Bill Details #{{ selectedBill.idBill }}
               </h2>
               <button
                 @click="showModal = false"
@@ -265,23 +265,23 @@ const handleCancel = (item: TableItem) => {
             <div class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 class="font-medium text-sky-900">Informations patient</h3>
+                  <h3 class="font-medium text-sky-900">Patient Information</h3>
                   <p>{{ selectedBill.clientName }}</p>
                   <p>{{ selectedBill.clientAddress }}</p>
                   <p>{{ selectedBill.clientPhone }}</p>
                   <p>{{ selectedBill.clientMail }}</p>
                 </div>
                 <div>
-                  <h3 class="font-medium text-sky-900">Informations rendez-vous</h3>
-                  <p>Date : {{ formatDate(selectedBill.appDate) }}</p>
-                  <p>Heure prévue : {{ formatTime(selectedBill.foresAppTime) }}</p>
-                  <p>Heure réelle : {{ formatTime(selectedBill.realAppTime) }}</p>
+                  <h3 class="font-medium text-sky-900">Appointment Information</h3>
+                  <p>Date: {{ formatDate(selectedBill.appDate) }}</p>
+                  <p>Scheduled Time: {{ formatTime(selectedBill.foresAppTime) }}</p>
+                  <p>Actual Time: {{ formatTime(selectedBill.realAppTime) }}</p>
                 </div>
               </div>
               <div>
-                <h3 class="font-medium text-sky-900">Informations facture</h3>
-                <p>Statut : {{ getStatusDisplay(selectedBill.billStatus) }}</p>
-                <p>Montant : {{ formatAmount(selectedBill.totalAmount) }}</p>
+                <h3 class="font-medium text-sky-900">Bill Information</h3>
+                <p>Status: {{ getStatusDisplay(selectedBill.billStatus) }}</p>
+                <p>Amount: {{ formatAmount(selectedBill.totalAmount) }}</p>
               </div>
             </div>
 
@@ -290,7 +290,7 @@ const handleCancel = (item: TableItem) => {
                 @click="showModal = false"
                 class="px-4 py-2 bg-sky-900/10 hover:bg-sky-900/20 text-sky-900 rounded-lg transition-colors"
               >
-                Fermer
+                Close
               </button>
             </div>
           </div>
